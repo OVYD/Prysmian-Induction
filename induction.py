@@ -4,28 +4,33 @@ import json
 import re
 from PIL import Image
 
-# --- BUCATA NOUA: Deschide Browser Automat ---
-# Aceasta asigură că atunci când pornești .exe, se deschide pagina
-# Doar la prima rulare a scriptului
-if "browser_opened" not in st.session_state:
-    st.session_state.browser_opened = True
-    # Forțăm deschiderea browserului (Streamlit face asta de obicei automat,
-    # dar într-un .exe e bine să fii sigur)
-# ---------------------------------------------
+# --- 1. SETUP & CONFIGURATION ---
+st.set_page_config(page_title="Induction Portal", page_icon="🏢", layout="wide")
 
-# --- MODIFICARE PENTRU EXECUTABIL ---
-# Salvăm datele în Documentele utilizatorului pentru a nu le pierde
-USER_DOCS = os.path.expanduser("~/Documents/InductionApp")
-if not os.path.exists(USER_DOCS):
-    os.makedirs(USER_DOCS)
+IMAGES_DIR = "images"
+DATA_FILE = "content_data.json"
 
-DATA_FILE = os.path.join(USER_DOCS, "content_data.json")
-# Imaginile ar trebui și ele salvate aici dacă vrei să persiste modificările din Admin
-IMAGES_DIR = os.path.join(USER_DOCS, "images") 
-# ------------------------------------
+# --- CRITICAL: DEFAULT CATEGORIES DEFINITION ---
+# Aceasta a lipsit data trecută și a cauzat eroarea "NameError".
+# Acum este definită corect la început.
+DEFAULT_CATEGORIES = {
+    "mfa": "🔐 1. MFA (Microsoft 2FA)",
+    "vpn": "🛡️ 2. VPN Config",
+    "outlook": "📧 3. Outlook & Email",
+    "mobile": "📱 4. Mobile APN",
+    "software_center": "💿 5. Software Center",
+    "other": "📚 6. Other Tutorials"
+}
+
+if not os.path.exists(IMAGES_DIR):
+    os.makedirs(IMAGES_DIR)
 
 # --- 2. DATA MANAGEMENT ---
 def load_data():
+    """
+    Loads data including dynamic categories.
+    Migrates hardcoded categories to JSON if running for the first time.
+    """
     base_structure = {
         "home": {"logo": "", "text": "# Welcome!\nSelect a guide from the left."},
         "categories_list": DEFAULT_CATEGORIES,
@@ -41,14 +46,17 @@ def load_data():
     
     data_modified = False
     
+    # 1. Ensure Home section
     if "home" not in data:
         data["home"] = base_structure["home"]
         data_modified = True
 
+    # 2. Ensure Categories section
     if "categories_list" not in data:
         data["categories_list"] = DEFAULT_CATEGORIES
         data_modified = True
         
+    # 3. Ensure content exists for all categories
     current_cats = data["categories_list"]
     for key in current_cats.keys():
         if key not in data:
@@ -75,6 +83,7 @@ def render_category_page(category_key):
     
     st.header(cat_name)
     
+    # Special Icon for Software Center
     if category_key == "software_center":
         icon_path = os.path.join(IMAGES_DIR, "software_center.png")
         if os.path.exists(icon_path):
@@ -93,16 +102,15 @@ def render_category_page(category_key):
         col1, col2 = st.columns([1, 1.5])
         img_path = os.path.join(IMAGES_DIR, item['image'])
         
-        # --- MODIFICARE: CUSTOM TITLE ---
-        # Verificăm dacă există un titlu personalizat salvat
+        # Check for Custom Title
         custom_title = item.get("title", "").strip()
         
         with col1:
             if custom_title:
-                st.subheader(custom_title) # Afișăm titlul tău (ex: "Logare")
+                st.subheader(custom_title)
             else:
-                st.subheader(f"Step {index + 1}") # Fallback la "Step 1"
-            
+                st.subheader(f"Step {index + 1}")
+                
             st.markdown(item.get('text', ''))
         
         with col2:
@@ -146,14 +154,17 @@ def show_admin():
         else:
             st.subheader("1. Select Category to Edit")
             cat_display = st.selectbox("Category:", list(categories.values()))
+            # Find internal key
             cat_key = [k for k, v in categories.items() if v == cat_display][0]
             
+            # Load content
             current_content = data.get(cat_key, {"description": "", "steps": []})
             current_steps = current_content["steps"]
             current_desc = current_content.get("description", "")
 
             st.markdown("---")
             
+            # Edit Description
             label_text = f"Intro/Description for {cat_display}:"
             new_desc = st.text_area(label_text, value=current_desc, height=70)
             
@@ -174,10 +185,10 @@ def show_admin():
                     with open(file_path, "wb") as f:
                         f.write(uploaded_file.getbuffer())
                     
-                    # Aici inițializăm titlul gol ("")
+                    # Init with empty title
                     current_steps.append({
                         "image": uploaded_file.name, 
-                        "title": "", 
+                        "title": "",
                         "text": f"**Instructions:** ..."
                     })
                 
@@ -199,16 +210,16 @@ def show_admin():
                             if os.path.exists(img_p):
                                 st.image(img_p, width=100)
                         with c2:
-                            # --- MODIFICARE: CUSTOM TITLE INPUT ---
+                            # Custom Title Input
                             current_title = item.get("title", "")
-                            new_title = st.text_input("Custom Title (Optional - overrides 'Step X'):", value=current_title, key=f"title_{cat_key}_{i}")
+                            new_title = st.text_input("Custom Title (Optional):", value=current_title, key=f"title_{cat_key}_{i}")
                             
                             if new_title != current_title:
                                 current_steps[i]['title'] = new_title
                                 data[cat_key]["steps"] = current_steps
                                 save_data(data)
-                            # --------------------------------------
 
+                            # Text Input
                             new_text = st.text_area("Text (Markdown):", value=item['text'], key=f"txt_{cat_key}_{i}", height=130)
                             if new_text != item['text']:
                                 current_steps[i]['text'] = new_text
@@ -247,7 +258,7 @@ def show_admin():
     # --- TAB 2: CREATE CATEGORY ---
     with tab_create:
         st.header("➕ Add New Category")
-        st.write("Create a new section in the menu.")
+        st.write("Start name with a number to keep order (e.g. '7. Printers')")
         
         col_new1, col_new2 = st.columns(2)
         with col_new1:
@@ -309,6 +320,7 @@ st.sidebar.title("Navigation")
 data_nav = load_data()
 current_categories = data_nav.get("categories_list", DEFAULT_CATEGORIES)
 
+# SMART SORTING FUNCTION
 def extract_number(name):
     match = re.search(r'(\d+)\.', name)
     if match:
