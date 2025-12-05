@@ -436,3 +436,4 @@ elif selected_page == "⚙️ ADMIN PANEL":
 else:
     key = [k for k, v in current_categories.items() if v == selected_page][0]
     render_category_page(key)
+st.sidebar.caption("v19.0 - Stable Release")
