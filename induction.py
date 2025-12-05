@@ -94,6 +94,35 @@ def log_event(message, level="INFO"):
     except Exception:
         pass
 
+# --- SECURITY CHECK ---
+def check_password():
+    """Returns `True` if the user had the correct password."""
+
+    def password_entered():
+        """Checks whether a password entered by the user is correct."""
+        if st.session_state["password"] == st.secrets["passwords"]["admin_password"]:
+            st.session_state["password_correct"] = True
+            del st.session_state["password"]  # Don't store password
+        else:
+            st.session_state["password_correct"] = False
+
+    if "password_correct" not in st.session_state:
+        # First run, show input for password.
+        st.sidebar.text_input(
+            "Admin Password", type="password", on_change=password_entered, key="password"
+        )
+        return False
+    elif not st.session_state["password_correct"]:
+        # Password incorrect, show input again.
+        st.sidebar.text_input(
+            "Admin Password", type="password", on_change=password_entered, key="password"
+        )
+        st.sidebar.error("😕 Password incorrect")
+        return False
+    else:
+        # Password correct.
+        return True
+
 # --- 3. FRONTEND: USER PAGES ---
 def render_category_page(category_key):
     data = load_data()
@@ -122,32 +151,27 @@ def render_category_page(category_key):
     for index, item in enumerate(items):
         col1, col2 = st.columns([1, 1.5])
         
-        # --- DATA RETRIEVAL ---
         media_file = item.get('image', '')
         video_url = item.get('video_url') or item.get('youtube', '')
-        step_icon = item.get('icon', '')  # NOU: Iconita mica
+        step_icon = item.get('icon', '')
         
         media_path = os.path.join(MEDIA_DIR, media_file)
         custom_title = item.get("title", "").strip()
         
-        # --- COLUMN 1: TITLE, ICON, TEXT ---
         with col1:
             if custom_title:
                 st.subheader(custom_title)
             else:
                 st.subheader(f"Step {index + 1}")
             
-            # AFISARE ICONITA (DACA EXISTA)
             if step_icon:
                 icon_fpath = os.path.join(MEDIA_DIR, step_icon)
                 if os.path.exists(icon_fpath):
-                    st.image(icon_fpath, width=64) # Iconita mica (64px)
+                    st.image(icon_fpath, width=64)
             
             st.markdown(item.get('text', ''))
         
-        # --- COLUMN 2: MAIN MEDIA (VIDEO/LARGE IMAGE) ---
         with col2:
-            # 1. Video URL
             if video_url:
                 if "sharepoint.com" in video_url or "microsoftstream.com" in video_url:
                     st.info("🔒 Corporate Video (Secured)")
@@ -156,11 +180,9 @@ def render_category_page(category_key):
                 else:
                     st.video(video_url)
             
-            # Spatiu intre ele
             if video_url and media_file and os.path.exists(media_path):
                 st.write("---")
 
-            # 2. Local File
             if media_file and os.path.exists(media_path):
                 if media_path.lower().endswith(('.mp4', '.mov', '.avi', '.mkv')):
                     st.video(media_path)
@@ -168,7 +190,7 @@ def render_category_page(category_key):
                     st.image(media_path, width="stretch")
             
             if not video_url and not (media_file and os.path.exists(media_path)):
-                 pass # Nu aratam eroare daca e gol, poate userul vrea doar text
+                 pass
                 
         st.divider()
 
@@ -192,6 +214,11 @@ def show_home():
 
 # --- 4. BACKEND: ADMIN PANEL ---
 def show_admin():
+    # --- SECURITY GATE ---
+    if not check_password():
+        st.stop() # Stops execution if password is not correct
+    # ---------------------
+
     st.title("⚙️ Admin Dashboard")
     
     tab_cats, tab_create, tab_home, tab_logs = st.tabs(["📂 Manage Content", "➕ Create Category", "🏠 Home Page", "📋 System Logs"])
@@ -199,7 +226,6 @@ def show_admin():
     data = load_data()
     categories = data["categories_list"]
 
-    # --- TAB: MANAGE CONTENT ---
     with tab_cats:
         if not categories:
             st.warning("No categories found.")
@@ -226,7 +252,6 @@ def show_admin():
 
             st.subheader("2. Add New Step")
             
-            # UPLOAD MAIN MEDIA
             uploaded_files = st.file_uploader(
                 f"Upload Main Media (Images/Video)", 
                 type=['png', 'jpg', 'jpeg', 'mp4', 'mov', 'avi'], 
@@ -245,7 +270,7 @@ def show_admin():
                         "image": uploaded_file.name, 
                         "title": "",
                         "video_url": "",
-                        "icon": "", # New field
+                        "icon": "", 
                         "text": f"**Instructions:** Watch the {ftype} above..."
                     })
                 
@@ -258,7 +283,6 @@ def show_admin():
             
             st.write("OR")
             
-            # ADD VIDEO LINK
             video_input = st.text_input("Add Video URL Step (YouTube/SharePoint):")
             if st.button("Add URL Step"):
                 if video_input:
@@ -266,7 +290,7 @@ def show_admin():
                         "image": "",
                         "title": "Video Tutorial",
                         "video_url": video_input,
-                        "icon": "", # New field
+                        "icon": "", 
                         "text": "**Instructions:** Watch the video..."
                     })
                     if cat_key not in data: data[cat_key] = {"description": "", "steps": []}
@@ -286,7 +310,6 @@ def show_admin():
                     with st.expander(f"Step {i+1}: {media_name}", expanded=True):
                         c1, c2 = st.columns([1, 3])
                         with c1:
-                            # Preview Icon
                             current_icon = item.get('icon', '')
                             if current_icon:
                                 icon_path = os.path.join(MEDIA_DIR, current_icon)
@@ -295,7 +318,6 @@ def show_admin():
                             
                             st.write("---")
                             
-                            # Preview Media
                             preview_url = item.get('video_url')
                             if preview_url:
                                 if "sharepoint" in preview_url: st.info("Link")
@@ -310,7 +332,6 @@ def show_admin():
                                         st.image(fpath, width=100)
                         
                         with c2:
-                            # Title
                             current_title = item.get("title", "")
                             new_title = st.text_input("Custom Title:", value=current_title, key=f"title_{cat_key}_{i}")
                             if new_title != current_title:
@@ -318,7 +339,6 @@ def show_admin():
                                 data[cat_key]["steps"] = current_steps
                                 save_data(data)
 
-                            # --- NEW: ICON UPLOADER ---
                             st.caption("🖼️ Step Icon (Small Logo):")
                             new_icon = st.file_uploader("Upload Icon:", type=['png', 'jpg'], key=f"icon_up_{cat_key}_{i}")
                             if new_icon:
@@ -329,7 +349,6 @@ def show_admin():
                                 data[cat_key]["steps"] = current_steps
                                 save_data(data)
                                 st.rerun()
-                            # --------------------------
 
                             st.caption("📂 Main Media (Upload File):")
                             new_upload = st.file_uploader("Replace Main File:", type=['png', 'jpg', 'jpeg', 'mp4', 'mov', 'avi'], key=f"reup_{cat_key}_{i}")
@@ -357,7 +376,6 @@ def show_admin():
                                 data[cat_key]["steps"] = current_steps
                                 save_data(data)
                             
-                            # Buttons Row
                             col_up, col_down, col_del = st.columns([1,1,2])
                             if col_up.button("⬆️", key=f"up_{cat_key}_{i}") and i > 0:
                                  current_steps[i], current_steps[i-1] = current_steps[i-1], current_steps[i]
@@ -387,7 +405,6 @@ def show_admin():
                     except Exception as e:
                         log_event(f"Error deleting: {e}", "ERROR")
 
-    # --- TAB: CREATE CATEGORY ---
     with tab_create:
         st.header("➕ Add New Category")
         col_new1, col_new2 = st.columns(2)
@@ -411,7 +428,6 @@ def show_admin():
             except Exception as e:
                 log_event(f"Create cat failed: {e}", "ERROR")
 
-    # --- TAB: HOME PAGE ---
     with tab_home:
         st.header("🏠 Home Page")
         home_data = data.get("home", {})
@@ -436,7 +452,6 @@ def show_admin():
                 save_data(data)
                 st.toast("Saved!")
 
-    # --- TAB: LOGS ---
     with tab_logs:
         st.header("📋 System Logs")
         if st.button("🗑️ Clear Logs"):
@@ -447,7 +462,7 @@ def show_admin():
         if logs: st.text_area("History:", value="\n".join(logs), height=400, disabled=True)
         else: st.write("No logs.")
 
-# --- 5. NAVIGATION (PERSISTENTA URL) ---
+# --- 5. NAVIGATION ---
 if "admin_logged_in" not in st.session_state:
     st.session_state["admin_logged_in"] = False
 
@@ -466,8 +481,7 @@ DISPLAY_TO_KEY = {v: k for k, v in current_categories.items()}
 sorted_display_names = sorted(list(current_categories.values()), key=extract_number)
 
 pages_list = ["🏠 Home"] + sorted_display_names
-if st.session_state["admin_logged_in"]:
-    pages_list.append("⚙️ ADMIN PANEL")
+pages_list.append("⚙️ ADMIN PANEL") # Mereu vizibil, dar cere parolă la intrare
 
 query_params = st.query_params
 default_index = 0
@@ -479,7 +493,7 @@ if target_key:
             default_index = pages_list.index(target_label)
     elif target_key == "home":
         default_index = 0
-    elif target_key == "admin" and st.session_state["admin_logged_in"]:
+    elif target_key == "admin":
         default_index = pages_list.index("⚙️ ADMIN PANEL")
 
 def on_menu_change():
@@ -494,23 +508,13 @@ selected_page = st.sidebar.radio("Go to:", pages_list, index=default_index, key=
 
 st.sidebar.markdown("---")
 
-if not st.session_state["admin_logged_in"]:
-    with st.sidebar.expander("Admin Access"):
-        if st.button("Login") or st.text_input("Pass", type="password") == "admin123":
-            st.session_state["admin_logged_in"] = True
-            log_event("Admin Login")
-            st.rerun()
-else:
-    if st.sidebar.button("Logout Admin"):
-        st.session_state["admin_logged_in"] = False
-        st.rerun()
-
-if selected_page == "🏠 Home":
-    show_home()
-elif selected_page == "⚙️ ADMIN PANEL":
+# Admin-ul este acum protejat de funcția check_password() din show_admin
+if selected_page == "⚙️ ADMIN PANEL":
     show_admin()
+elif selected_page == "🏠 Home":
+    show_home()
 else:
     key = [k for k, v in current_categories.items() if v == selected_page][0]
     render_category_page(key)
     
-st.sidebar.caption("v22.0 - Stable Release")
+st.sidebar.caption("v23.0 - Secured")
