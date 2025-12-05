@@ -3,6 +3,7 @@ import streamlit.components.v1 as components
 import os
 import json
 import re
+import datetime
 from PIL import Image
 
 # --- 1. SETUP & CONFIGURATION ---
@@ -29,6 +30,7 @@ def load_data():
     base_structure = {
         "home": {"logo": "", "text": "# Welcome!\nSelect a guide from the left."},
         "categories_list": DEFAULT_CATEGORIES,
+        "system_logs": []
     }
 
     if not os.path.exists(DATA_FILE):
@@ -49,6 +51,10 @@ def load_data():
         data["categories_list"] = DEFAULT_CATEGORIES
         data_modified = True
         
+    if "system_logs" not in data:
+        data["system_logs"] = []
+        data_modified = True
+        
     current_cats = data["categories_list"]
     for key in current_cats.keys():
         if key not in data:
@@ -61,8 +67,32 @@ def load_data():
     return data
 
 def save_data(data):
-    with open(DATA_FILE, "w") as f:
-        json.dump(data, f, indent=4)
+    try:
+        with open(DATA_FILE, "w") as f:
+            json.dump(data, f, indent=4)
+    except Exception as e:
+        print(f"CRITICAL ERROR SAVING DATA: {e}")
+
+def log_event(message, level="INFO"):
+    try:
+        if os.path.exists(DATA_FILE):
+            with open(DATA_FILE, "r") as f:
+                data = json.load(f)
+        else:
+            data = {"system_logs": []}
+            
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        entry = f"[{timestamp}] [{level}] {message}"
+        
+        if "system_logs" not in data: data["system_logs"] = []
+        data["system_logs"].insert(0, entry)
+        if len(data["system_logs"]) > 100:
+            data["system_logs"] = data["system_logs"][:100]
+            
+        with open(DATA_FILE, "w") as f:
+            json.dump(data, f, indent=4)
+    except Exception:
+        pass
 
 # --- 3. FRONTEND: USER PAGES ---
 def render_category_page(category_key):
@@ -92,24 +122,32 @@ def render_category_page(category_key):
     for index, item in enumerate(items):
         col1, col2 = st.columns([1, 1.5])
         
+        # --- DATA RETRIEVAL ---
         media_file = item.get('image', '')
         video_url = item.get('video_url') or item.get('youtube', '')
+        step_icon = item.get('icon', '')  # NOU: Iconita mica
         
         media_path = os.path.join(MEDIA_DIR, media_file)
         custom_title = item.get("title", "").strip()
         
+        # --- COLUMN 1: TITLE, ICON, TEXT ---
         with col1:
             if custom_title:
                 st.subheader(custom_title)
             else:
                 st.subheader(f"Step {index + 1}")
-                
+            
+            # AFISARE ICONITA (DACA EXISTA)
+            if step_icon:
+                icon_fpath = os.path.join(MEDIA_DIR, step_icon)
+                if os.path.exists(icon_fpath):
+                    st.image(icon_fpath, width=64) # Iconita mica (64px)
+            
             st.markdown(item.get('text', ''))
         
+        # --- COLUMN 2: MAIN MEDIA (VIDEO/LARGE IMAGE) ---
         with col2:
-            # --- MODIFICARE: AFIȘARE AMBELE (DACA EXISTA) ---
-            
-            # 1. Video URL (SharePoint / YouTube)
+            # 1. Video URL
             if video_url:
                 if "sharepoint.com" in video_url or "microsoftstream.com" in video_url:
                     st.info("🔒 Corporate Video (Secured)")
@@ -118,20 +156,19 @@ def render_category_page(category_key):
                 else:
                     st.video(video_url)
             
-            # Spatiu daca ambele exista
+            # Spatiu intre ele
             if video_url and media_file and os.path.exists(media_path):
                 st.write("---")
 
-            # 2. Local File (Image / Video) - NU mai este 'elif', ci 'if' separat
+            # 2. Local File
             if media_file and os.path.exists(media_path):
                 if media_path.lower().endswith(('.mp4', '.mov', '.avi', '.mkv')):
                     st.video(media_path)
                 else:
                     st.image(media_path, width="stretch")
             
-            # Error only if NOTHING exists
             if not video_url and not (media_file and os.path.exists(media_path)):
-                 st.error(f"No media content available.")
+                 pass # Nu aratam eroare daca e gol, poate userul vrea doar text
                 
         st.divider()
 
@@ -157,12 +194,12 @@ def show_home():
 def show_admin():
     st.title("⚙️ Admin Dashboard")
     
-    tab_cats, tab_create, tab_home = st.tabs(["📂 Manage Content", "➕ Create Category", "🏠 Home Page"])
+    tab_cats, tab_create, tab_home, tab_logs = st.tabs(["📂 Manage Content", "➕ Create Category", "🏠 Home Page", "📋 System Logs"])
     
     data = load_data()
     categories = data["categories_list"]
 
-    # --- TAB 1: MANAGE CONTENT ---
+    # --- TAB: MANAGE CONTENT ---
     with tab_cats:
         if not categories:
             st.warning("No categories found.")
@@ -187,16 +224,16 @@ def show_admin():
 
             st.markdown("---")
 
-            st.subheader("2. Add New Step (Choose Type)")
+            st.subheader("2. Add New Step")
             
-            # --- OPTION A: UPLOAD ---
+            # UPLOAD MAIN MEDIA
             uploaded_files = st.file_uploader(
-                f"Upload Files (Images or MP4/MOV)", 
+                f"Upload Main Media (Images/Video)", 
                 type=['png', 'jpg', 'jpeg', 'mp4', 'mov', 'avi'], 
                 accept_multiple_files=True
             )
             
-            if uploaded_files and st.button("💾 SAVE FILES"):
+            if uploaded_files and st.button("💾 SAVE NEW STEPS"):
                 for uploaded_file in uploaded_files:
                     file_path = os.path.join(MEDIA_DIR, uploaded_file.name)
                     with open(file_path, "wb") as f:
@@ -208,55 +245,62 @@ def show_admin():
                         "image": uploaded_file.name, 
                         "title": "",
                         "video_url": "",
+                        "icon": "", # New field
                         "text": f"**Instructions:** Watch the {ftype} above..."
                     })
                 
                 if cat_key not in data: data[cat_key] = {"description": "", "steps": []}
                 data[cat_key]["steps"] = current_steps
                 save_data(data)
-                st.success("Media Saved!")
+                log_event(f"Added {len(uploaded_files)} files to {cat_key}")
+                st.success("Steps Added!")
                 st.rerun()
             
-            st.markdown("---")
+            st.write("OR")
             
-            # --- OPTION B: URL ---
-            video_input = st.text_input("Add Video URL (YouTube, SharePoint Link):")
-            if st.button("Add Video Link"):
+            # ADD VIDEO LINK
+            video_input = st.text_input("Add Video URL Step (YouTube/SharePoint):")
+            if st.button("Add URL Step"):
                 if video_input:
                     current_steps.append({
                         "image": "",
                         "title": "Video Tutorial",
-                        "video_url": video_input, 
+                        "video_url": video_input,
+                        "icon": "", # New field
                         "text": "**Instructions:** Watch the video..."
                     })
                     if cat_key not in data: data[cat_key] = {"description": "", "steps": []}
                     data[cat_key]["steps"] = current_steps
                     save_data(data)
-                    st.success("Video Link Added!")
+                    log_event(f"Added URL step to {cat_key}")
+                    st.success("Step Added!")
                     st.rerun()
 
             if current_steps:
                 st.markdown("---")
                 st.write("### Edit Content & Reorder")
                 for i, item in enumerate(current_steps):
-                    # Preview Logic for Admin
-                    media_info = []
-                    if item.get('video_url'): media_info.append("🔗 URL Linked")
-                    if item.get('image'): media_info.append("📂 File Attached")
-                    media_name = " + ".join(media_info) if media_info else "No Media"
-
+                    media_name = item.get('image', 'No File')
+                    if item.get('video_url'): media_name = "Linked Video"
+                    
                     with st.expander(f"Step {i+1}: {media_name}", expanded=True):
                         c1, c2 = st.columns([1, 3])
                         with c1:
-                            # Preview URL
-                            preview_url = item.get('video_url') or item.get('youtube', '')
-                            if preview_url:
-                                if "sharepoint" in preview_url:
-                                    st.info("SharePoint Link")
-                                else:
-                                    st.video(preview_url)
+                            # Preview Icon
+                            current_icon = item.get('icon', '')
+                            if current_icon:
+                                icon_path = os.path.join(MEDIA_DIR, current_icon)
+                                if os.path.exists(icon_path):
+                                    st.image(icon_path, width=50, caption="Icon")
                             
-                            # Preview File
+                            st.write("---")
+                            
+                            # Preview Media
+                            preview_url = item.get('video_url')
+                            if preview_url:
+                                if "sharepoint" in preview_url: st.info("Link")
+                                else: st.video(preview_url)
+                            
                             if item.get('image'):
                                 fpath = os.path.join(MEDIA_DIR, item['image'])
                                 if os.path.exists(fpath):
@@ -266,7 +310,7 @@ def show_admin():
                                         st.image(fpath, width=100)
                         
                         with c2:
-                            # Custom Title
+                            # Title
                             current_title = item.get("title", "")
                             new_title = st.text_input("Custom Title:", value=current_title, key=f"title_{cat_key}_{i}")
                             if new_title != current_title:
@@ -274,70 +318,76 @@ def show_admin():
                                 data[cat_key]["steps"] = current_steps
                                 save_data(data)
 
-                            # --- FILE UPLOAD (ADD/REPLACE) ---
-                            st.caption("📂 Add/Replace Uploaded File:")
-                            new_upload = st.file_uploader("Choose file:", type=['png', 'jpg', 'jpeg', 'mp4', 'mov', 'avi'], key=f"reup_{cat_key}_{i}")
-                            
+                            # --- NEW: ICON UPLOADER ---
+                            st.caption("🖼️ Step Icon (Small Logo):")
+                            new_icon = st.file_uploader("Upload Icon:", type=['png', 'jpg'], key=f"icon_up_{cat_key}_{i}")
+                            if new_icon:
+                                fpath = os.path.join(MEDIA_DIR, new_icon.name)
+                                with open(fpath, "wb") as f:
+                                    f.write(new_icon.getbuffer())
+                                current_steps[i]['icon'] = new_icon.name
+                                data[cat_key]["steps"] = current_steps
+                                save_data(data)
+                                st.rerun()
+                            # --------------------------
+
+                            st.caption("📂 Main Media (Upload File):")
+                            new_upload = st.file_uploader("Replace Main File:", type=['png', 'jpg', 'jpeg', 'mp4', 'mov', 'avi'], key=f"reup_{cat_key}_{i}")
                             if new_upload:
                                 fpath = os.path.join(MEDIA_DIR, new_upload.name)
                                 with open(fpath, "wb") as f:
                                     f.write(new_upload.getbuffer())
-                                
                                 current_steps[i]['image'] = new_upload.name
-                                # NOTA: Nu mai stergem video_url aici!
-                                
                                 data[cat_key]["steps"] = current_steps
                                 save_data(data)
                                 st.rerun()
 
-                            # --- VIDEO URL (ADD/REPLACE) ---
                             current_video_url = item.get("video_url") or item.get("youtube", "")
-                            new_video_url = st.text_input("Video URL (Optional):", value=current_video_url, key=f"vid_{cat_key}_{i}")
+                            new_video_url = st.text_input("Main Video URL:", value=current_video_url, key=f"vid_{cat_key}_{i}")
                             if new_video_url != current_video_url:
                                 current_steps[i]['video_url'] = new_video_url
                                 if 'youtube' in current_steps[i]: del current_steps[i]['youtube']
-                                # NOTA: Nu mai stergem 'image' aici!
-                                
                                 data[cat_key]["steps"] = current_steps
                                 save_data(data)
                                 st.rerun()
 
-                            # Text Markdown
                             new_text = st.text_area("Text (Markdown):", value=item['text'], key=f"txt_{cat_key}_{i}", height=100)
                             if new_text != item['text']:
                                 current_steps[i]['text'] = new_text
                                 data[cat_key]["steps"] = current_steps
                                 save_data(data)
                             
+                            # Buttons Row
                             col_up, col_down, col_del = st.columns([1,1,2])
-                            
-                            if col_up.button("⬆️ Up", key=f"up_{cat_key}_{i}") and i > 0:
-                                 current_steps[i], current_steps[i-1] = current_steps[i-1], current_steps[i-1]
+                            if col_up.button("⬆️", key=f"up_{cat_key}_{i}") and i > 0:
+                                 current_steps[i], current_steps[i-1] = current_steps[i-1], current_steps[i]
                                  save_data(data)
                                  st.rerun()
-                            
-                            if col_down.button("⬇️ Down", key=f"down_{cat_key}_{i}") and i < len(current_steps)-1:
+                            if col_down.button("⬇️", key=f"down_{cat_key}_{i}") and i < len(current_steps)-1:
                                  current_steps[i], current_steps[i+1] = current_steps[i+1], current_steps[i]
                                  save_data(data)
                                  st.rerun()
-                            
                             if col_del.button("🗑️ Delete", key=f"del_{cat_key}_{i}", type="primary"):
                                 current_steps.pop(i)
                                 data[cat_key]["steps"] = current_steps
                                 save_data(data)
+                                log_event(f"Deleted step in {cat_key}")
                                 st.rerun()
             
             st.markdown("---")
             with st.expander("⚠️ Danger Zone"):
                 if st.button(f"🗑️ DELETE CATEGORY '{cat_display}'", type="primary"):
-                    del data["categories_list"][cat_key]
-                    if cat_key in data:
-                        del data[cat_key]
-                    save_data(data)
-                    st.success("Deleted!")
-                    st.rerun()
+                    try:
+                        del data["categories_list"][cat_key]
+                        if cat_key in data: del data[cat_key]
+                        save_data(data)
+                        log_event(f"Deleted CATEGORY {cat_display}", "WARNING")
+                        st.success("Deleted!")
+                        st.rerun()
+                    except Exception as e:
+                        log_event(f"Error deleting: {e}", "ERROR")
 
-    # --- TAB 2: CREATE CATEGORY ---
+    # --- TAB: CREATE CATEGORY ---
     with tab_create:
         st.header("➕ Add New Category")
         col_new1, col_new2 = st.columns(2)
@@ -346,37 +396,37 @@ def show_admin():
             new_cat_id = st.text_input("Internal ID (Unique)", placeholder="e.g. printers").strip().lower()
             
         if st.button("Create Category"):
-            if not new_cat_name or not new_cat_id:
-                st.error("Please fill in both fields.")
-            elif new_cat_id in categories:
-                st.error("This ID already exists.")
-            else:
-                data["categories_list"][new_cat_id] = new_cat_name
-                data[new_cat_id] = {"description": "", "steps": []}
-                save_data(data)
-                st.success(f"Created!")
-                st.rerun()
+            try:
+                if not new_cat_name or not new_cat_id:
+                    st.error("Fill both fields.")
+                elif new_cat_id in categories:
+                    st.error("ID exists.")
+                else:
+                    data["categories_list"][new_cat_id] = new_cat_name
+                    data[new_cat_id] = {"description": "", "steps": []}
+                    save_data(data)
+                    log_event(f"Created category {new_cat_name}")
+                    st.success("Created!")
+                    st.rerun()
+            except Exception as e:
+                log_event(f"Create cat failed: {e}", "ERROR")
 
-    # --- TAB 3: HOME PAGE ---
+    # --- TAB: HOME PAGE ---
     with tab_home:
         st.header("🏠 Home Page")
         home_data = data.get("home", {})
-        
         col_a, col_b = st.columns(2)
         with col_a:
-            logo_upload = st.file_uploader("Upload Logo", type=['png', 'jpg', 'jpeg'])
+            logo_upload = st.file_uploader("Upload Logo", type=['png', 'jpg'])
             if logo_upload and st.button("💾 Set Logo"):
                 logo_path = os.path.join(MEDIA_DIR, logo_upload.name)
-                with open(logo_path, "wb") as f:
-                    f.write(logo_upload.getbuffer())
+                with open(logo_path, "wb") as f: f.write(logo_upload.getbuffer())
                 home_data["logo"] = logo_upload.name
                 data["home"] = home_data
                 save_data(data)
-                st.success("Logo Updated!")
                 st.rerun()
             if home_data.get("logo"):
                 st.image(os.path.join(MEDIA_DIR, home_data.get("logo")), width=200)
-        
         with col_b:
             current_text = home_data.get("text", "")
             new_home_text = st.text_area("Welcome Message:", value=current_text, height=400)
@@ -386,7 +436,18 @@ def show_admin():
                 save_data(data)
                 st.toast("Saved!")
 
-# --- 5. NAVIGATION ---
+    # --- TAB: LOGS ---
+    with tab_logs:
+        st.header("📋 System Logs")
+        if st.button("🗑️ Clear Logs"):
+            data["system_logs"] = []
+            save_data(data)
+            st.rerun()
+        logs = data.get("system_logs", [])
+        if logs: st.text_area("History:", value="\n".join(logs), height=400, disabled=True)
+        else: st.write("No logs.")
+
+# --- 5. NAVIGATION (PERSISTENTA URL) ---
 if "admin_logged_in" not in st.session_state:
     st.session_state["admin_logged_in"] = False
 
@@ -401,6 +462,7 @@ def extract_number(name):
     return 999
 
 KEY_TO_DISPLAY = {k: v for k, v in current_categories.items()}
+DISPLAY_TO_KEY = {v: k for k, v in current_categories.items()}
 sorted_display_names = sorted(list(current_categories.values()), key=extract_number)
 
 pages_list = ["🏠 Home"] + sorted_display_names
@@ -409,20 +471,34 @@ if st.session_state["admin_logged_in"]:
 
 query_params = st.query_params
 default_index = 0
-if "page" in query_params:
-    target_key = query_params["page"]
+target_key = query_params.get("page", None)
+if target_key:
     if target_key in KEY_TO_DISPLAY:
         target_label = KEY_TO_DISPLAY[target_key]
         if target_label in pages_list:
             default_index = pages_list.index(target_label)
+    elif target_key == "home":
+        default_index = 0
+    elif target_key == "admin" and st.session_state["admin_logged_in"]:
+        default_index = pages_list.index("⚙️ ADMIN PANEL")
 
-selected_page = st.sidebar.radio("Go to:", pages_list, index=default_index)
+def on_menu_change():
+    selection = st.session_state.menu_selection
+    if selection == "🏠 Home": st.query_params["page"] = "home"
+    elif selection == "⚙️ ADMIN PANEL": st.query_params["page"] = "admin"
+    else:
+        key = DISPLAY_TO_KEY.get(selection)
+        if key: st.query_params["page"] = key
+
+selected_page = st.sidebar.radio("Go to:", pages_list, index=default_index, key="menu_selection", on_change=on_menu_change)
+
 st.sidebar.markdown("---")
 
 if not st.session_state["admin_logged_in"]:
     with st.sidebar.expander("Admin Access"):
         if st.button("Login") or st.text_input("Pass", type="password") == "admin123":
             st.session_state["admin_logged_in"] = True
+            log_event("Admin Login")
             st.rerun()
 else:
     if st.sidebar.button("Logout Admin"):
@@ -436,5 +512,5 @@ elif selected_page == "⚙️ ADMIN PANEL":
 else:
     key = [k for k, v in current_categories.items() if v == selected_page][0]
     render_category_page(key)
-st.sidebar.markdown("---")
-st.sidebar.caption("✅ Versiunea 19.0 (Live)")
+    
+st.sidebar.caption("v22.0 - Stable Release")
