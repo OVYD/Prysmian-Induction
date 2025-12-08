@@ -6,7 +6,7 @@ import re
 import datetime
 import hashlib
 from PIL import Image
-import urllib.parse # Necesar pentru URL encoding la mailto
+import urllib.parse 
 
 # --- 1. SETUP & CONFIGURATION ---
 st.set_page_config(page_title="Induction Portal", page_icon="🏢", layout="wide")
@@ -29,11 +29,9 @@ if not os.path.exists(MEDIA_DIR):
 
 # --- SECURITY UTILS ---
 def hash_password(password):
-    """Creates a SHA256 hash of the password."""
     return hashlib.sha256(str.encode(password)).hexdigest()
 
 def verify_password(stored_hash, provided_password):
-    """Verifies a stored hash against a provided password."""
     return stored_hash == hashlib.sha256(str.encode(provided_password)).hexdigest()
 
 # --- 2. DATA MANAGEMENT ---
@@ -121,37 +119,22 @@ def render_category_page(category_key):
     with c_head1:
         st.header(cat_name)
     with c_head2:
-        # --- SHARE BUTTON LOGIC ---
         with st.popover("📤 Share"):
-            # Construct Base URL (adaptat pentru Streamlit Cloud)
-            # Daca ruleaza local e localhost, daca e pe cloud e url-ul real
-            # Streamlit nu expune usor URL-ul complet in cod, asa ca il construim relativ sau hardcodam domeniul public daca stim ca e live
-            
-            # Varianta Generica: Folosim query params
-            base_url = "https://prysmian-induction.streamlit.app/" # INLOCUIESTE CU DOMENIUL TAU DACA E DIFERIT
+            base_url = "https://prysmian-induction.streamlit.app/" 
             share_link = f"{base_url}?page={category_key}"
             
             st.markdown("##### Share this guide")
-            
-            # 1. Email
             subject = urllib.parse.quote(f"Induction Guide: {cat_name}")
             body = urllib.parse.quote(f"Hello,\n\nCheck out this guide for {cat_name}:\n{share_link}\n\nBest regards.")
             mailto_link = f"mailto:?subject={subject}&body={body}"
             st.link_button("📧 Send via Email", mailto_link)
-            
             st.divider()
-            
-            # 2. Copy Link
             st.caption("🔗 Direct Link")
-            st.code(share_link, language=None) # st.code are buton de copy automat
-            
+            st.code(share_link, language=None)
             st.divider()
-            
-            # 3. Embed Code
             st.caption("💻 Embed Code (SharePoint/Teams)")
             embed_code = f'<iframe src="{share_link}" width="100%" height="800px" style="border:none;"></iframe>'
             st.code(embed_code, language="html")
-        # --------------------------
     
     if category_key == "software_center":
         icon_path = os.path.join(MEDIA_DIR, "software_center.png")
@@ -207,6 +190,9 @@ def render_category_page(category_key):
                     st.video(media_path)
                 else:
                     st.image(media_path, width="stretch")
+            
+            if not video_url and not (media_file and os.path.exists(media_path)):
+                 pass
                 
         st.divider()
 
@@ -214,7 +200,6 @@ def show_home():
     data = load_data()
     home_content = data.get("home", {})
     
-    # HEADER CU SHARE PENTRU HOME
     c_h1, c_h2 = st.columns([4, 1])
     with c_h2:
         with st.popover("📤 Share App"):
@@ -225,14 +210,13 @@ def show_home():
             st.link_button("📧 Email Link", f"mailto:?subject={subject}&body={body}")
             st.caption("🔗 Link")
             st.code(base_url, language=None)
-    # -----------------------------
     
     logo_file = home_content.get("logo", "")
     if logo_file:
         logo_path = os.path.join(MEDIA_DIR, logo_file)
         if os.path.exists(logo_path):
             with c_h1:
-               pass # Logo is centered below usually
+               pass
             c_center = st.container()
             with c_center:
                  col_l, col_c, col_r = st.columns([1, 2, 1])
@@ -247,8 +231,6 @@ def show_home():
 
 # --- 4. BACKEND: ADMIN PANEL ---
 def show_admin():
-    # Security check is now handled in navigation
-    
     st.title("⚙️ Admin Dashboard")
     
     tab_cats, tab_create, tab_home, tab_users, tab_logs = st.tabs([
@@ -532,7 +514,12 @@ DISPLAY_TO_KEY = {v: k for k, v in current_categories.items()}
 sorted_display_names = sorted(list(current_categories.values()), key=extract_number)
 
 pages_list = ["🏠 Home"] + sorted_display_names
-pages_list.append("⚙️ ADMIN PANEL")
+
+# --- MODIFICARE: ADMIN ASCUNS ---
+# Doar daca suntem deja logati, aratam "ADMIN PANEL" in lista principala
+if st.session_state["admin_logged_in"]:
+    pages_list.append("⚙️ ADMIN PANEL")
+# --------------------------------
 
 query_params = st.query_params
 default_index = 0
@@ -544,7 +531,7 @@ if target_key:
             default_index = pages_list.index(target_label)
     elif target_key == "home":
         default_index = 0
-    elif target_key == "admin":
+    elif target_key == "admin" and st.session_state["admin_logged_in"]:
         default_index = pages_list.index("⚙️ ADMIN PANEL")
 
 def on_menu_change():
@@ -559,7 +546,9 @@ selected_page = st.sidebar.radio("Go to:", pages_list, index=default_index, key=
 
 st.sidebar.markdown("---")
 
+# --- LOGIN MUTAT JOS (Expander) ---
 if not st.session_state["admin_logged_in"]:
+    # Aici este formularul de login ASCUNS in expander
     with st.sidebar.expander("Admin Login", expanded=False):
         username_in = st.text_input("Username")
         password_in = st.text_input("Password", type="password")
@@ -578,24 +567,29 @@ if not st.session_state["admin_logged_in"]:
             if success:
                 st.session_state["admin_logged_in"] = True
                 log_event(f"Admin login: {username_in}")
+                # Cand te loghezi, te trimite direct in Admin Panel
+                st.query_params["page"] = "admin"
                 st.rerun()
             else:
                 st.error("Invalid credentials")
 else:
+    # Daca esti logat, arata butonul de Logout
     if st.sidebar.button("Logout"):
         st.session_state["admin_logged_in"] = False
+        st.query_params["page"] = "home"
         st.rerun()
 
 if selected_page == "⚙️ ADMIN PANEL":
     if st.session_state["admin_logged_in"]:
         show_admin()
     else:
-        st.title("🔒 Admin Access")
-        st.warning("Please login using the sidebar menu to access the Admin Panel.")
+        # Protectie extra: daca cineva incearca sa intre pe URL ?page=admin fara login
+        st.title("🔒 Access Denied")
+        st.warning("Please login using the sidebar menu.")
 elif selected_page == "🏠 Home":
     show_home()
 else:
     key = [k for k, v in current_categories.items() if v == selected_page][0]
     render_category_page(key)
     
-st.sidebar.caption("v25.0 - Share Enabled")
+st.sidebar.caption("v26.0 - Hidden Admin")
