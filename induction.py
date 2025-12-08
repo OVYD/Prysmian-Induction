@@ -4,6 +4,7 @@ import os
 import json
 import re
 import datetime
+import hashlib
 from PIL import Image
 
 # --- 1. SETUP & CONFIGURATION ---
@@ -25,12 +26,22 @@ DEFAULT_CATEGORIES = {
 if not os.path.exists(MEDIA_DIR):
     os.makedirs(MEDIA_DIR)
 
+# --- SECURITY UTILS ---
+def hash_password(password):
+    """Creates a SHA256 hash of the password."""
+    return hashlib.sha256(str.encode(password)).hexdigest()
+
+def verify_password(stored_hash, provided_password):
+    """Verifies a stored hash against a provided password."""
+    return stored_hash == hashlib.sha256(str.encode(provided_password)).hexdigest()
+
 # --- 2. DATA MANAGEMENT ---
 def load_data():
     base_structure = {
         "home": {"logo": "", "text": "# Welcome!\nSelect a guide from the left."},
         "categories_list": DEFAULT_CATEGORIES,
-        "system_logs": []
+        "system_logs": [],
+        "admins": {} # New: Stores extra admin users {username: password_hash}
     }
 
     if not os.path.exists(DATA_FILE):
@@ -43,16 +54,18 @@ def load_data():
     
     data_modified = False
     
+    # Ensure all required keys exist
     if "home" not in data:
         data["home"] = base_structure["home"]
         data_modified = True
-
     if "categories_list" not in data:
         data["categories_list"] = DEFAULT_CATEGORIES
         data_modified = True
-        
     if "system_logs" not in data:
         data["system_logs"] = []
+        data_modified = True
+    if "admins" not in data:
+        data["admins"] = {}
         data_modified = True
         
     current_cats = data["categories_list"]
@@ -93,35 +106,6 @@ def log_event(message, level="INFO"):
             json.dump(data, f, indent=4)
     except Exception:
         pass
-
-# --- SECURITY CHECK ---
-def check_password():
-    """Returns `True` if the user had the correct password."""
-
-    def password_entered():
-        """Checks whether a password entered by the user is correct."""
-        if st.session_state["password"] == st.secrets["passwords"]["admin_password"]:
-            st.session_state["password_correct"] = True
-            del st.session_state["password"]  # Don't store password
-        else:
-            st.session_state["password_correct"] = False
-
-    if "password_correct" not in st.session_state:
-        # First run, show input for password.
-        st.sidebar.text_input(
-            "Admin Password", type="password", on_change=password_entered, key="password"
-        )
-        return False
-    elif not st.session_state["password_correct"]:
-        # Password incorrect, show input again.
-        st.sidebar.text_input(
-            "Admin Password", type="password", on_change=password_entered, key="password"
-        )
-        st.sidebar.error("😕 Password incorrect")
-        return False
-    else:
-        # Password correct.
-        return True
 
 # --- 3. FRONTEND: USER PAGES ---
 def render_category_page(category_key):
@@ -188,9 +172,6 @@ def render_category_page(category_key):
                     st.video(media_path)
                 else:
                     st.image(media_path, width="stretch")
-            
-            if not video_url and not (media_file and os.path.exists(media_path)):
-                 pass
                 
         st.divider()
 
@@ -214,14 +195,17 @@ def show_home():
 
 # --- 4. BACKEND: ADMIN PANEL ---
 def show_admin():
-    # --- SECURITY GATE ---
-    if not check_password():
-        st.stop() # Stops execution if password is not correct
-    # ---------------------
-
+    # Security check is now handled in navigation, show_admin assumes logged in
+    
     st.title("⚙️ Admin Dashboard")
     
-    tab_cats, tab_create, tab_home, tab_logs = st.tabs(["📂 Manage Content", "➕ Create Category", "🏠 Home Page", "📋 System Logs"])
+    tab_cats, tab_create, tab_home, tab_users, tab_logs = st.tabs([
+        "📂 Manage Content", 
+        "➕ Create Category", 
+        "🏠 Home Page", 
+        "👥 Manage Team",
+        "📋 System Logs"
+    ])
     
     data = load_data()
     categories = data["categories_list"]
@@ -239,7 +223,6 @@ def show_admin():
             current_desc = current_content.get("description", "")
 
             st.markdown("---")
-            
             label_text = f"Intro/Description for {cat_display}:"
             new_desc = st.text_area(label_text, value=current_desc, height=70)
             if new_desc != current_desc:
@@ -249,7 +232,6 @@ def show_admin():
                 st.toast("Description Saved!")
 
             st.markdown("---")
-
             st.subheader("2. Add New Step")
             
             uploaded_files = st.file_uploader(
@@ -265,19 +247,15 @@ def show_admin():
                         f.write(uploaded_file.getbuffer())
                     
                     ftype = "Video" if uploaded_file.name.endswith(('.mp4', '.mov')) else "Image"
-                    
                     current_steps.append({
-                        "image": uploaded_file.name, 
-                        "title": "",
-                        "video_url": "",
-                        "icon": "", 
+                        "image": uploaded_file.name, "title": "", "video_url": "", "icon": "",
                         "text": f"**Instructions:** Watch the {ftype} above..."
                     })
                 
                 if cat_key not in data: data[cat_key] = {"description": "", "steps": []}
                 data[cat_key]["steps"] = current_steps
                 save_data(data)
-                log_event(f"Added {len(uploaded_files)} files to {cat_key}")
+                log_event(f"Added files to {cat_key}")
                 st.success("Steps Added!")
                 st.rerun()
             
@@ -287,10 +265,7 @@ def show_admin():
             if st.button("Add URL Step"):
                 if video_input:
                     current_steps.append({
-                        "image": "",
-                        "title": "Video Tutorial",
-                        "video_url": video_input,
-                        "icon": "", 
+                        "image": "", "title": "Video Tutorial", "video_url": video_input, "icon": "",
                         "text": "**Instructions:** Watch the video..."
                     })
                     if cat_key not in data: data[cat_key] = {"description": "", "steps": []}
@@ -315,21 +290,16 @@ def show_admin():
                                 icon_path = os.path.join(MEDIA_DIR, current_icon)
                                 if os.path.exists(icon_path):
                                     st.image(icon_path, width=50, caption="Icon")
-                            
                             st.write("---")
-                            
                             preview_url = item.get('video_url')
                             if preview_url:
                                 if "sharepoint" in preview_url: st.info("Link")
                                 else: st.video(preview_url)
-                            
                             if item.get('image'):
                                 fpath = os.path.join(MEDIA_DIR, item['image'])
                                 if os.path.exists(fpath):
-                                    if fpath.lower().endswith(('.mp4', '.mov')):
-                                        st.video(fpath)
-                                    else:
-                                        st.image(fpath, width=100)
+                                    if fpath.lower().endswith(('.mp4', '.mov')): st.video(fpath)
+                                    else: st.image(fpath, width=100)
                         
                         with c2:
                             current_title = item.get("title", "")
@@ -339,30 +309,28 @@ def show_admin():
                                 data[cat_key]["steps"] = current_steps
                                 save_data(data)
 
-                            st.caption("🖼️ Step Icon (Small Logo):")
-                            new_icon = st.file_uploader("Upload Icon:", type=['png', 'jpg'], key=f"icon_up_{cat_key}_{i}")
+                            st.caption("🖼️ Step Icon:")
+                            new_icon = st.file_uploader("Icon:", type=['png', 'jpg'], key=f"icon_up_{cat_key}_{i}")
                             if new_icon:
                                 fpath = os.path.join(MEDIA_DIR, new_icon.name)
-                                with open(fpath, "wb") as f:
-                                    f.write(new_icon.getbuffer())
+                                with open(fpath, "wb") as f: f.write(new_icon.getbuffer())
                                 current_steps[i]['icon'] = new_icon.name
                                 data[cat_key]["steps"] = current_steps
                                 save_data(data)
                                 st.rerun()
 
-                            st.caption("📂 Main Media (Upload File):")
-                            new_upload = st.file_uploader("Replace Main File:", type=['png', 'jpg', 'jpeg', 'mp4', 'mov', 'avi'], key=f"reup_{cat_key}_{i}")
+                            st.caption("📂 Main Media:")
+                            new_upload = st.file_uploader("Replace:", type=['png', 'jpg', 'jpeg', 'mp4', 'mov', 'avi'], key=f"reup_{cat_key}_{i}")
                             if new_upload:
                                 fpath = os.path.join(MEDIA_DIR, new_upload.name)
-                                with open(fpath, "wb") as f:
-                                    f.write(new_upload.getbuffer())
+                                with open(fpath, "wb") as f: f.write(new_upload.getbuffer())
                                 current_steps[i]['image'] = new_upload.name
                                 data[cat_key]["steps"] = current_steps
                                 save_data(data)
                                 st.rerun()
 
                             current_video_url = item.get("video_url") or item.get("youtube", "")
-                            new_video_url = st.text_input("Main Video URL:", value=current_video_url, key=f"vid_{cat_key}_{i}")
+                            new_video_url = st.text_input("Video URL:", value=current_video_url, key=f"vid_{cat_key}_{i}")
                             if new_video_url != current_video_url:
                                 current_steps[i]['video_url'] = new_video_url
                                 if 'youtube' in current_steps[i]: del current_steps[i]['youtube']
@@ -370,7 +338,7 @@ def show_admin():
                                 save_data(data)
                                 st.rerun()
 
-                            new_text = st.text_area("Text (Markdown):", value=item['text'], key=f"txt_{cat_key}_{i}", height=100)
+                            new_text = st.text_area("Text:", value=item['text'], key=f"txt_{cat_key}_{i}", height=100)
                             if new_text != item['text']:
                                 current_steps[i]['text'] = new_text
                                 data[cat_key]["steps"] = current_steps
@@ -395,15 +363,11 @@ def show_admin():
             st.markdown("---")
             with st.expander("⚠️ Danger Zone"):
                 if st.button(f"🗑️ DELETE CATEGORY '{cat_display}'", type="primary"):
-                    try:
-                        del data["categories_list"][cat_key]
-                        if cat_key in data: del data[cat_key]
-                        save_data(data)
-                        log_event(f"Deleted CATEGORY {cat_display}", "WARNING")
-                        st.success("Deleted!")
-                        st.rerun()
-                    except Exception as e:
-                        log_event(f"Error deleting: {e}", "ERROR")
+                    del data["categories_list"][cat_key]
+                    if cat_key in data: del data[cat_key]
+                    save_data(data)
+                    st.success("Deleted!")
+                    st.rerun()
 
     with tab_create:
         st.header("➕ Add New Category")
@@ -413,20 +377,13 @@ def show_admin():
             new_cat_id = st.text_input("Internal ID (Unique)", placeholder="e.g. printers").strip().lower()
             
         if st.button("Create Category"):
-            try:
-                if not new_cat_name or not new_cat_id:
-                    st.error("Fill both fields.")
-                elif new_cat_id in categories:
-                    st.error("ID exists.")
-                else:
-                    data["categories_list"][new_cat_id] = new_cat_name
-                    data[new_cat_id] = {"description": "", "steps": []}
-                    save_data(data)
-                    log_event(f"Created category {new_cat_name}")
-                    st.success("Created!")
-                    st.rerun()
-            except Exception as e:
-                log_event(f"Create cat failed: {e}", "ERROR")
+            if new_cat_id in categories: st.error("ID exists.")
+            else:
+                data["categories_list"][new_cat_id] = new_cat_name
+                data[new_cat_id] = {"description": "", "steps": []}
+                save_data(data)
+                st.success(f"Created!")
+                st.rerun()
 
     with tab_home:
         st.header("🏠 Home Page")
@@ -441,8 +398,7 @@ def show_admin():
                 data["home"] = home_data
                 save_data(data)
                 st.rerun()
-            if home_data.get("logo"):
-                st.image(os.path.join(MEDIA_DIR, home_data.get("logo")), width=200)
+            if home_data.get("logo"): st.image(os.path.join(MEDIA_DIR, home_data.get("logo")), width=200)
         with col_b:
             current_text = home_data.get("text", "")
             new_home_text = st.text_area("Welcome Message:", value=current_text, height=400)
@@ -451,6 +407,53 @@ def show_admin():
                 data["home"] = home_data
                 save_data(data)
                 st.toast("Saved!")
+
+    # --- TAB: MANAGE TEAM (NEW) ---
+    with tab_users:
+        st.header("👥 Manage Team Access")
+        
+        # Add User
+        st.subheader("Create New Admin")
+        col_u1, col_u2 = st.columns(2)
+        with col_u1:
+            new_user = st.text_input("Username:")
+        with col_u2:
+            new_pass = st.text_input("Password:", type="password")
+            
+        if st.button("Add User"):
+            if new_user and new_pass:
+                if new_user == "admin":
+                    st.error("Cannot overwrite Master Admin.")
+                else:
+                    if "admins" not in data: data["admins"] = {}
+                    # Hash password before saving
+                    data["admins"][new_user] = hash_password(new_pass)
+                    save_data(data)
+                    log_event(f"Created admin user: {new_user}")
+                    st.success(f"User {new_user} created!")
+                    st.rerun()
+            else:
+                st.error("Please fill both fields.")
+        
+        st.divider()
+        
+        # List Users
+        st.subheader("Existing Admins")
+        admins = data.get("admins", {})
+        
+        if admins:
+            for user in list(admins.keys()):
+                c1, c2 = st.columns([3, 1])
+                with c1:
+                    st.write(f"👤 **{user}**")
+                with c2:
+                    if st.button(f"🗑️ Remove", key=f"del_user_{user}"):
+                        del data["admins"][user]
+                        save_data(data)
+                        log_event(f"Removed admin user: {user}")
+                        st.rerun()
+        else:
+            st.info("No additional admins. Only Master Admin (from secrets) is active.")
 
     with tab_logs:
         st.header("📋 System Logs")
@@ -481,7 +484,8 @@ DISPLAY_TO_KEY = {v: k for k, v in current_categories.items()}
 sorted_display_names = sorted(list(current_categories.values()), key=extract_number)
 
 pages_list = ["🏠 Home"] + sorted_display_names
-pages_list.append("⚙️ ADMIN PANEL") # Mereu vizibil, dar cere parolă la intrare
+# Admin link always visible
+pages_list.append("⚙️ ADMIN PANEL")
 
 query_params = st.query_params
 default_index = 0
@@ -508,13 +512,50 @@ selected_page = st.sidebar.radio("Go to:", pages_list, index=default_index, key=
 
 st.sidebar.markdown("---")
 
-# Admin-ul este acum protejat de funcția check_password() din show_admin
+# --- LOGIN LOGIC ---
+if not st.session_state["admin_logged_in"]:
+    with st.sidebar.expander("Admin Login", expanded=False):
+        username_in = st.text_input("Username")
+        password_in = st.text_input("Password", type="password")
+        if st.button("Login"):
+            success = False
+            
+            # 1. Check Master Admin (Secrets)
+            try:
+                master_pass = st.secrets["passwords"]["admin_password"]
+                if username_in == "admin" and password_in == master_pass:
+                    success = True
+            except:
+                pass # Secrets might not be set locally
+                
+            # 2. Check Database Admins
+            if not success:
+                admins = data_nav.get("admins", {})
+                if username_in in admins:
+                    if verify_password(admins[username_in], password_in):
+                        success = True
+            
+            if success:
+                st.session_state["admin_logged_in"] = True
+                log_event(f"Admin login: {username_in}")
+                st.rerun()
+            else:
+                st.error("Invalid credentials")
+else:
+    if st.sidebar.button("Logout"):
+        st.session_state["admin_logged_in"] = False
+        st.rerun()
+
 if selected_page == "⚙️ ADMIN PANEL":
-    show_admin()
+    if st.session_state["admin_logged_in"]:
+        show_admin()
+    else:
+        st.title("🔒 Admin Access")
+        st.warning("Please login using the sidebar menu to access the Admin Panel.")
 elif selected_page == "🏠 Home":
     show_home()
 else:
     key = [k for k, v in current_categories.items() if v == selected_page][0]
     render_category_page(key)
     
-st.sidebar.caption("v23.0 - Secured")
+st.sidebar.caption("v24.0 - MultiUser")
