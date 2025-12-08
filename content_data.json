@@ -134,6 +134,7 @@
         "other": "\ud83d\udcda 6. Other Tutorials"
     },
     "system_logs": [
+        "[2025-12-08 10:00:24] [INFO] Admin login: admin",
         "[2025-12-05 15:33:34] [INFO] Replaced media in mobile step 1",
         "[2025-12-05 15:33:34] [INFO] Replaced media in mobile step 1",
         "[2025-12-05 15:33:34] [INFO] Replaced media in mobile step 1",
@@ -231,8 +232,8 @@
         "[2025-12-05 15:33:11] [INFO] Replaced media in mobile step 1",
         "[2025-12-05 15:33:11] [INFO] Replaced media in mobile step 1",
         "[2025-12-05 15:33:11] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:10] [INFO] Replaced media in mobile step 1",
         "[2025-12-05 15:33:10] [INFO] Replaced media in mobile step 1",
         "[2025-12-05 15:33:10] [INFO] Replaced media in mobile step 1"
-    ]
+    ],
+    "admins": {}
 }
