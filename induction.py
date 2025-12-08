@@ -9,10 +9,47 @@ from PIL import Image
 import urllib.parse 
 
 # --- 1. SETUP & CONFIGURATION ---
-st.set_page_config(page_title="Induction Portal", page_icon="🏢", layout="wide")
+st.set_page_config(page_title="Induction Portal", page_icon="🏢", layout="wide", initial_sidebar_state="expanded")
 
 MEDIA_DIR = "images"
 DATA_FILE = "content_data.json"
+
+# --- CSS: LOCK SIDEBAR & SEAMLESS FOOTER ---
+st.markdown("""
+    <style>
+        /* 1. Blocare Sidebar la lățime fixă și ascundere mâner resize */
+        section[data-testid="stSidebar"] {
+            width: 260px !important; # Force width
+        }
+        div[data-testid="stSidebar"] {
+            min-width: 260px !important;
+            max-width: 260px !important;
+        }
+        div[data-testid="stSidebar"] > div:nth-child(2) {
+            display: none; /* Ascunde mânerul */
+        }
+        
+        /* 2. Footer Integrat (Transparent & Fix) */
+        .sidebar-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 260px; /* Aceeași lățime ca sidebar-ul */
+            padding: 15px;
+            text-align: center;
+            font-size: 11px;
+            color: #808495; /* Culoare text discretă (specifică Streamlit caption) */
+            background: transparent; /* Fără fundal urât */
+            z-index: 100;
+            pointer-events: none; /* Permite click prin el dacă e cazul */
+        }
+        
+        /* 3. Ajustare pentru scrollbar să nu acopere textul */
+        div[data-testid="stSidebarUserContent"] {
+            padding-bottom: 50px; /* Spațiu jos ca să nu se suprapună cu footer-ul */
+        }
+    </style>
+""", unsafe_allow_html=True)
 
 # --- DEFAULT CATEGORIES ---
 DEFAULT_CATEGORIES = {
@@ -174,6 +211,7 @@ def render_category_page(category_key):
             st.markdown(item.get('text', ''))
         
         with col2:
+            # Afisare Video URL
             if video_url:
                 if "sharepoint.com" in video_url or "microsoftstream.com" in video_url:
                     st.info("🔒 Corporate Video (Secured)")
@@ -182,6 +220,7 @@ def render_category_page(category_key):
                 else:
                     st.video(video_url)
             
+            # Afisare Fisier Local
             if video_url and media_file and os.path.exists(media_path):
                 st.write("---")
 
@@ -237,7 +276,7 @@ def show_admin():
         "📂 Manage Content", 
         "➕ Create Category", 
         "🏠 Home Page", 
-        "👥 Manage Team",
+        "👥 Manage Team", 
         "📋 System Logs"
     ])
     
@@ -367,7 +406,6 @@ def show_admin():
                             new_video_url = st.text_input("Video URL:", value=current_video_url, key=f"vid_{cat_key}_{i}")
                             if new_video_url != current_video_url:
                                 current_steps[i]['video_url'] = new_video_url
-                                # Keep existing file if url changes (Dual Mode)
                                 data[cat_key]["steps"] = current_steps
                                 save_data(data)
                                 st.rerun()
@@ -515,11 +553,9 @@ sorted_display_names = sorted(list(current_categories.values()), key=extract_num
 
 pages_list = ["🏠 Home"] + sorted_display_names
 
-# --- MODIFICARE: ADMIN ASCUNS ---
-# Doar daca suntem deja logati, aratam "ADMIN PANEL" in lista principala
+# --- ADMIN HIDDEN ---
 if st.session_state["admin_logged_in"]:
     pages_list.append("⚙️ ADMIN PANEL")
-# --------------------------------
 
 query_params = st.query_params
 default_index = 0
@@ -546,9 +582,22 @@ selected_page = st.sidebar.radio("Go to:", pages_list, index=default_index, key=
 
 st.sidebar.markdown("---")
 
-# --- LOGIN MUTAT JOS (Expander) ---
+# --- FOOTER INVISIBLE SPACER & TEXT ---
+# Acest container impinge continutul jos
+st.sidebar.markdown('<div style="margin-top: 50px;"></div>', unsafe_allow_html=True)
+
+st.sidebar.markdown(
+    """
+    <div class="sidebar-footer">
+        Created by Dinulescu Cosmin Ovidiu<br>
+        v28.0 - Seamless
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+# --- LOGIN JOS ---
 if not st.session_state["admin_logged_in"]:
-    # Aici este formularul de login ASCUNS in expander
     with st.sidebar.expander("Admin Login", expanded=False):
         username_in = st.text_input("Username")
         password_in = st.text_input("Password", type="password")
@@ -567,13 +616,11 @@ if not st.session_state["admin_logged_in"]:
             if success:
                 st.session_state["admin_logged_in"] = True
                 log_event(f"Admin login: {username_in}")
-                # Cand te loghezi, te trimite direct in Admin Panel
                 st.query_params["page"] = "admin"
                 st.rerun()
             else:
                 st.error("Invalid credentials")
 else:
-    # Daca esti logat, arata butonul de Logout
     if st.sidebar.button("Logout"):
         st.session_state["admin_logged_in"] = False
         st.query_params["page"] = "home"
@@ -583,7 +630,6 @@ if selected_page == "⚙️ ADMIN PANEL":
     if st.session_state["admin_logged_in"]:
         show_admin()
     else:
-        # Protectie extra: daca cineva incearca sa intre pe URL ?page=admin fara login
         st.title("🔒 Access Denied")
         st.warning("Please login using the sidebar menu.")
 elif selected_page == "🏠 Home":
@@ -591,5 +637,3 @@ elif selected_page == "🏠 Home":
 else:
     key = [k for k, v in current_categories.items() if v == selected_page][0]
     render_category_page(key)
-    
-st.sidebar.caption("v26.0 - Hidden Admin")
