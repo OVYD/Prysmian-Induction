@@ -6,6 +6,7 @@ import re
 import datetime
 import hashlib
 from PIL import Image
+import urllib.parse # Necesar pentru URL encoding la mailto
 
 # --- 1. SETUP & CONFIGURATION ---
 st.set_page_config(page_title="Induction Portal", page_icon="🏢", layout="wide")
@@ -41,7 +42,7 @@ def load_data():
         "home": {"logo": "", "text": "# Welcome!\nSelect a guide from the left."},
         "categories_list": DEFAULT_CATEGORIES,
         "system_logs": [],
-        "admins": {} # New: Stores extra admin users {username: password_hash}
+        "admins": {}
     }
 
     if not os.path.exists(DATA_FILE):
@@ -54,7 +55,6 @@ def load_data():
     
     data_modified = False
     
-    # Ensure all required keys exist
     if "home" not in data:
         data["home"] = base_structure["home"]
         data_modified = True
@@ -116,7 +116,42 @@ def render_category_page(category_key):
     description = content.get("description", "")
     items = content.get("steps", [])
     
-    st.header(cat_name)
+    # HEADER CU SHARE
+    c_head1, c_head2 = st.columns([4, 1])
+    with c_head1:
+        st.header(cat_name)
+    with c_head2:
+        # --- SHARE BUTTON LOGIC ---
+        with st.popover("📤 Share"):
+            # Construct Base URL (adaptat pentru Streamlit Cloud)
+            # Daca ruleaza local e localhost, daca e pe cloud e url-ul real
+            # Streamlit nu expune usor URL-ul complet in cod, asa ca il construim relativ sau hardcodam domeniul public daca stim ca e live
+            
+            # Varianta Generica: Folosim query params
+            base_url = "https://prysmian-induction.streamlit.app/" # INLOCUIESTE CU DOMENIUL TAU DACA E DIFERIT
+            share_link = f"{base_url}?page={category_key}"
+            
+            st.markdown("##### Share this guide")
+            
+            # 1. Email
+            subject = urllib.parse.quote(f"Induction Guide: {cat_name}")
+            body = urllib.parse.quote(f"Hello,\n\nCheck out this guide for {cat_name}:\n{share_link}\n\nBest regards.")
+            mailto_link = f"mailto:?subject={subject}&body={body}"
+            st.link_button("📧 Send via Email", mailto_link)
+            
+            st.divider()
+            
+            # 2. Copy Link
+            st.caption("🔗 Direct Link")
+            st.code(share_link, language=None) # st.code are buton de copy automat
+            
+            st.divider()
+            
+            # 3. Embed Code
+            st.caption("💻 Embed Code (SharePoint/Teams)")
+            embed_code = f'<iframe src="{share_link}" width="100%" height="800px" style="border:none;"></iframe>'
+            st.code(embed_code, language="html")
+        # --------------------------
     
     if category_key == "software_center":
         icon_path = os.path.join(MEDIA_DIR, "software_center.png")
@@ -179,13 +214,30 @@ def show_home():
     data = load_data()
     home_content = data.get("home", {})
     
+    # HEADER CU SHARE PENTRU HOME
+    c_h1, c_h2 = st.columns([4, 1])
+    with c_h2:
+        with st.popover("📤 Share App"):
+            base_url = "https://prysmian-induction.streamlit.app/"
+            st.markdown("##### Share Application")
+            subject = urllib.parse.quote("IT Induction Portal")
+            body = urllib.parse.quote(f"Hello,\n\nAccess the IT Induction Portal here:\n{base_url}")
+            st.link_button("📧 Email Link", f"mailto:?subject={subject}&body={body}")
+            st.caption("🔗 Link")
+            st.code(base_url, language=None)
+    # -----------------------------
+    
     logo_file = home_content.get("logo", "")
     if logo_file:
         logo_path = os.path.join(MEDIA_DIR, logo_file)
         if os.path.exists(logo_path):
-            c1, c2, c3 = st.columns([1, 2, 1])
-            with c2:
-                st.image(logo_path, width="stretch")
+            with c_h1:
+               pass # Logo is centered below usually
+            c_center = st.container()
+            with c_center:
+                 col_l, col_c, col_r = st.columns([1, 2, 1])
+                 with col_c:
+                     st.image(logo_path, width="stretch")
     
     welcome_text = home_content.get("text", "")
     if welcome_text:
@@ -195,7 +247,7 @@ def show_home():
 
 # --- 4. BACKEND: ADMIN PANEL ---
 def show_admin():
-    # Security check is now handled in navigation, show_admin assumes logged in
+    # Security check is now handled in navigation
     
     st.title("⚙️ Admin Dashboard")
     
@@ -333,7 +385,7 @@ def show_admin():
                             new_video_url = st.text_input("Video URL:", value=current_video_url, key=f"vid_{cat_key}_{i}")
                             if new_video_url != current_video_url:
                                 current_steps[i]['video_url'] = new_video_url
-                                if 'youtube' in current_steps[i]: del current_steps[i]['youtube']
+                                # Keep existing file if url changes (Dual Mode)
                                 data[cat_key]["steps"] = current_steps
                                 save_data(data)
                                 st.rerun()
@@ -363,11 +415,15 @@ def show_admin():
             st.markdown("---")
             with st.expander("⚠️ Danger Zone"):
                 if st.button(f"🗑️ DELETE CATEGORY '{cat_display}'", type="primary"):
-                    del data["categories_list"][cat_key]
-                    if cat_key in data: del data[cat_key]
-                    save_data(data)
-                    st.success("Deleted!")
-                    st.rerun()
+                    try:
+                        del data["categories_list"][cat_key]
+                        if cat_key in data: del data[cat_key]
+                        save_data(data)
+                        log_event(f"Deleted CATEGORY {cat_display}", "WARNING")
+                        st.success("Deleted!")
+                        st.rerun()
+                    except Exception as e:
+                        log_event(f"Error deleting: {e}", "ERROR")
 
     with tab_create:
         st.header("➕ Add New Category")
@@ -408,11 +464,8 @@ def show_admin():
                 save_data(data)
                 st.toast("Saved!")
 
-    # --- TAB: MANAGE TEAM (NEW) ---
     with tab_users:
         st.header("👥 Manage Team Access")
-        
-        # Add User
         st.subheader("Create New Admin")
         col_u1, col_u2 = st.columns(2)
         with col_u1:
@@ -426,7 +479,6 @@ def show_admin():
                     st.error("Cannot overwrite Master Admin.")
                 else:
                     if "admins" not in data: data["admins"] = {}
-                    # Hash password before saving
                     data["admins"][new_user] = hash_password(new_pass)
                     save_data(data)
                     log_event(f"Created admin user: {new_user}")
@@ -436,16 +488,12 @@ def show_admin():
                 st.error("Please fill both fields.")
         
         st.divider()
-        
-        # List Users
         st.subheader("Existing Admins")
         admins = data.get("admins", {})
-        
         if admins:
             for user in list(admins.keys()):
                 c1, c2 = st.columns([3, 1])
-                with c1:
-                    st.write(f"👤 **{user}**")
+                with c1: st.write(f"👤 **{user}**")
                 with c2:
                     if st.button(f"🗑️ Remove", key=f"del_user_{user}"):
                         del data["admins"][user]
@@ -453,7 +501,7 @@ def show_admin():
                         log_event(f"Removed admin user: {user}")
                         st.rerun()
         else:
-            st.info("No additional admins. Only Master Admin (from secrets) is active.")
+            st.info("No additional admins.")
 
     with tab_logs:
         st.header("📋 System Logs")
@@ -484,7 +532,6 @@ DISPLAY_TO_KEY = {v: k for k, v in current_categories.items()}
 sorted_display_names = sorted(list(current_categories.values()), key=extract_number)
 
 pages_list = ["🏠 Home"] + sorted_display_names
-# Admin link always visible
 pages_list.append("⚙️ ADMIN PANEL")
 
 query_params = st.query_params
@@ -512,28 +559,21 @@ selected_page = st.sidebar.radio("Go to:", pages_list, index=default_index, key=
 
 st.sidebar.markdown("---")
 
-# --- LOGIN LOGIC ---
 if not st.session_state["admin_logged_in"]:
     with st.sidebar.expander("Admin Login", expanded=False):
         username_in = st.text_input("Username")
         password_in = st.text_input("Password", type="password")
         if st.button("Login"):
             success = False
-            
-            # 1. Check Master Admin (Secrets)
             try:
                 master_pass = st.secrets["passwords"]["admin_password"]
                 if username_in == "admin" and password_in == master_pass:
                     success = True
-            except:
-                pass # Secrets might not be set locally
-                
-            # 2. Check Database Admins
+            except: pass 
             if not success:
                 admins = data_nav.get("admins", {})
-                if username_in in admins:
-                    if verify_password(admins[username_in], password_in):
-                        success = True
+                if username_in in admins and verify_password(admins[username_in], password_in):
+                    success = True
             
             if success:
                 st.session_state["admin_logged_in"] = True
@@ -558,4 +598,4 @@ else:
     key = [k for k, v in current_categories.items() if v == selected_page][0]
     render_category_page(key)
     
-st.sidebar.caption("v24.0 - MultiUser")
+st.sidebar.caption("v25.0 - Share Enabled")
