@@ -3,16 +3,16 @@
         "description": "**Two-Factor Authentication (2FA)** is now mandatory across our organization. This security measure is required for accessing your Microsoft account, logging into partner platforms via **Single Sign-On (SSO)**, and for performing password resets.\n\n**Two-Factor Authentication (2FA)** is enforced company-wide to protect your identity and data. Multi-factor verification is required for the following actions:\n\nAccessing your corporate **Microsoft account**.\n\nAuthenticating via **Single Sign-On (SSO)** with external partners.\n\nInitiating self-service password changes.",
         "steps": [
             {
-                "image": "1.png",
+                "image": "3.png",
                 "text": "\n\nPlease navigate to **https://myaccount.microsoft.com/** and let's begin to secure your account."
             },
             {
                 "image": "2.png",
-                "text": "This image illustrates the verification request displayed on your device when authenticating with your Prysmian credentials."
+                "text": "\n\nPlease navigate to **https://myaccount.microsoft.com/** and let's begin to secure your account."
             },
             {
-                "image": "3.png",
-                "text": "Locate the **Security info** tab on the left side of the page. Once open, click the **Add sign-in method** button."
+                "image": "1.png",
+                "text": "This image illustrates the verification request displayed on your device when authenticating with your Prysmian credentials."
             },
             {
                 "image": "4.png",
@@ -114,8 +114,16 @@
         ]
     },
     "other": {
-        "description": "",
-        "steps": []
+        "description": "One Drive Tutorial",
+        "steps": [
+            {
+                "image": "OneDrive configuration video.mp4",
+                "title": "One Drive Video Tutorial",
+                "video_url": "",
+                "icon": "",
+                "text": ""
+            }
+        ]
     },
     "home": {
         "logo": "Prysmian logo positive transparent bckgr.png",
@@ -134,6 +142,12 @@
         "other": "\ud83d\udcda 6. Other Tutorials"
     },
     "system_logs": [
+        "[2025-12-12 09:52:49] [INFO] Added files to other",
+        "[2025-12-12 09:52:07] [INFO] Admin login: admin",
+        "[2025-12-09 16:52:14] [WARNING] Deleted CATEGORY Enrollment of New Device",
+        "[2025-12-09 16:40:20] [INFO] Admin login: admin",
+        "[2025-12-09 09:25:11] [INFO] Admin login: admin",
+        "[2025-12-08 15:03:55] [INFO] Admin login: admin",
         "[2025-12-08 10:43:48] [INFO] Admin login: admin",
         "[2025-12-08 10:32:27] [INFO] Admin login: admin",
         "[2025-12-08 10:00:24] [INFO] Admin login: admin",
@@ -227,13 +241,7 @@
         "[2025-12-05 15:33:13] [INFO] Replaced media in mobile step 1",
         "[2025-12-05 15:33:12] [INFO] Replaced media in mobile step 1",
         "[2025-12-05 15:33:12] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:12] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:12] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:11] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:11] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:11] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:11] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:11] [INFO] Replaced media in mobile step 1"
+        "[2025-12-05 15:33:12] [INFO] Replaced media in mobile step 1"
     ],
     "admins": {}
 }
