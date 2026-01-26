@@ -14,39 +14,73 @@ st.set_page_config(page_title="Induction Portal", page_icon="🏢", layout="wide
 MEDIA_DIR = "images"
 DATA_FILE = "content_data.json"
 
+# --- THEME CSS INJECTION ---
+# Această funcție aplică stiluri CSS în funcție de starea toggle-ului
+def apply_theme(dark_mode):
+    if dark_mode:
+        st.markdown("""
+            <style>
+                /* Dark Mode Overrides */
+                .stApp {
+                    background-color: #0E1117;
+                    color: #FAFAFA;
+                }
+                .sidebar-footer {
+                    background-color: transparent !important;
+                    color: #aaa !important;
+                }
+                /* Alte ajustări pentru input-uri și text */
+                .stTextInput > div > div > input {
+                    color: #FAFAFA;
+                    background-color: #262730;
+                }
+            </style>
+        """, unsafe_allow_html=True)
+    else:
+        st.markdown("""
+            <style>
+                /* Light Mode Overrides */
+                .stApp {
+                    background-color: #FFFFFF;
+                    color: #31333F;
+                }
+                .sidebar-footer {
+                    background-color: transparent !important;
+                    color: #808495 !important;
+                }
+            </style>
+        """, unsafe_allow_html=True)
+
 # --- CSS: LOCK SIDEBAR & SEAMLESS FOOTER ---
 st.markdown("""
     <style>
-        /* 1. Blocare Sidebar la lățime fixă și ascundere mâner resize */
+        /* 1. Blocare Sidebar */
         section[data-testid="stSidebar"] {
-            width: 260px !important; # Force width
+            width: 260px !important;
         }
         div[data-testid="stSidebar"] {
             min-width: 260px !important;
             max-width: 260px !important;
         }
         div[data-testid="stSidebar"] > div:nth-child(2) {
-            display: none; /* Ascunde mânerul */
+            display: none; 
         }
         
-        /* 2. Footer Integrat (Transparent & Fix) */
+        /* 2. Footer Integrat */
         .sidebar-footer {
             position: fixed;
             bottom: 0;
             left: 0;
-            width: 260px; /* Aceeași lățime ca sidebar-ul */
+            width: 260px;
             padding: 15px;
             text-align: center;
             font-size: 11px;
-            color: #808495; /* Culoare text discretă (specifică Streamlit caption) */
-            background: transparent; /* Fără fundal urât */
             z-index: 100;
-            pointer-events: none; /* Permite click prin el dacă e cazul */
+            pointer-events: none;
         }
         
-        /* 3. Ajustare pentru scrollbar să nu acopere textul */
         div[data-testid="stSidebarUserContent"] {
-            padding-bottom: 50px; /* Spațiu jos ca să nu se suprapună cu footer-ul */
+            padding-bottom: 50px;
         }
     </style>
 """, unsafe_allow_html=True)
@@ -211,7 +245,6 @@ def render_category_page(category_key):
             st.markdown(item.get('text', ''))
         
         with col2:
-            # Afisare Video URL
             if video_url:
                 if "sharepoint.com" in video_url or "microsoftstream.com" in video_url:
                     st.info("🔒 Corporate Video (Secured)")
@@ -220,7 +253,6 @@ def render_category_page(category_key):
                 else:
                     st.video(video_url)
             
-            # Afisare Fisier Local
             if video_url and media_file and os.path.exists(media_path):
                 st.write("---")
 
@@ -582,15 +614,27 @@ selected_page = st.sidebar.radio("Go to:", pages_list, index=default_index, key=
 
 st.sidebar.markdown("---")
 
-# --- FOOTER INVISIBLE SPACER & TEXT ---
-# Acest container impinge continutul jos
-st.sidebar.markdown('<div style="margin-top: 50px;"></div>', unsafe_allow_html=True)
+# --- DARK MODE TOGGLE (NOU) ---
+if "dark_mode" not in st.session_state:
+    st.session_state.dark_mode = True  # Default Dark Mode
 
+# Buton Toggle cu salvare stare
+dark_mode = st.sidebar.toggle("🌙 Dark Mode", value=st.session_state.dark_mode)
+
+if dark_mode != st.session_state.dark_mode:
+    st.session_state.dark_mode = dark_mode
+    st.rerun()
+
+# Aplicam tema
+apply_theme(st.session_state.dark_mode)
+
+# --- FOOTER ---
+st.sidebar.markdown('<div style="margin-top: 50px;"></div>', unsafe_allow_html=True)
 st.sidebar.markdown(
     """
     <div class="sidebar-footer">
         Created by Dinulescu Cosmin Ovidiu<br>
-        v28.0 - Seamless
+        v29.0 - Dark/Light
     </div>
     """,
     unsafe_allow_html=True
