@@ -1,10 +1,4 @@
 import streamlit as st
-import sys
-import os
-
-# Fix for Streamlit Cloud "ModuleNotFoundError"
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-
 from modules.ui_components import inject_custom_css, render_sidebar, render_home_page, render_category_page, render_search_results
 from modules.admin import render_admin_panel
 
