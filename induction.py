@@ -15,7 +15,6 @@ MEDIA_DIR = "images"
 DATA_FILE = "content_data.json"
 
 # --- THEME CSS INJECTION ---
-# Această funcție aplică stiluri CSS în funcție de starea toggle-ului
 def apply_theme(dark_mode):
     if dark_mode:
         st.markdown("""
@@ -29,7 +28,6 @@ def apply_theme(dark_mode):
                     background-color: transparent !important;
                     color: #aaa !important;
                 }
-                /* Alte ajustări pentru input-uri și text */
                 .stTextInput > div > div > input {
                     color: #FAFAFA;
                     background-color: #262730;
@@ -54,7 +52,6 @@ def apply_theme(dark_mode):
 # --- CSS: LOCK SIDEBAR & SEAMLESS FOOTER ---
 st.markdown("""
     <style>
-        /* 1. Blocare Sidebar */
         section[data-testid="stSidebar"] {
             width: 260px !important;
         }
@@ -65,8 +62,6 @@ st.markdown("""
         div[data-testid="stSidebar"] > div:nth-child(2) {
             display: none; 
         }
-        
-        /* 2. Footer Integrat */
         .sidebar-footer {
             position: fixed;
             bottom: 0;
@@ -78,7 +73,6 @@ st.markdown("""
             z-index: 100;
             pointer-events: none;
         }
-        
         div[data-testid="stSidebarUserContent"] {
             padding-bottom: 50px;
         }
@@ -231,6 +225,11 @@ def render_category_page(category_key):
         media_path = os.path.join(MEDIA_DIR, media_file)
         custom_title = item.get("title", "").strip()
         
+        # --- FIX: Ascundem titlul "Video Tutorial" daca nu exista video ---
+        if custom_title == "Video Tutorial" and not video_url:
+            custom_title = "" 
+        # -----------------------------------------------------------------
+
         with col1:
             if custom_title:
                 st.subheader(custom_title)
@@ -251,7 +250,11 @@ def render_category_page(category_key):
                     st.caption("This video requires SharePoint login.")
                     st.link_button("▶️ Watch Video on SharePoint", video_url, type="primary")
                 else:
-                    st.video(video_url)
+                    try:
+                        st.video(video_url)
+                    except Exception:
+                        st.warning("⚠️ Cannot play video inline.")
+                        st.link_button("🔗 Open Link", video_url)
             
             if video_url and media_file and os.path.exists(media_path):
                 st.write("---")
@@ -337,57 +340,133 @@ def show_admin():
                 st.toast("Description Saved!")
 
             st.markdown("---")
-            st.subheader("2. Add New Step")
+            st.subheader("2. Add Content")
             
-            uploaded_files = st.file_uploader(
-                f"Upload Main Media (Images/Video)", 
-                type=['png', 'jpg', 'jpeg', 'mp4', 'mov', 'avi'], 
-                accept_multiple_files=True
+            # --- MENIU FLEXIBIL DE ADAUGARE (NOU v30) ---
+            add_mode = st.radio("Select Content Type:", 
+                ["📤 Quick Media Upload", "🔗 Quick Video Link", "✨ Custom Step (Advanced)"], 
+                horizontal=True,
+                label_visibility="collapsed"
             )
-            
-            if uploaded_files and st.button("💾 SAVE NEW STEPS"):
-                for uploaded_file in uploaded_files:
-                    file_path = os.path.join(MEDIA_DIR, uploaded_file.name)
-                    with open(file_path, "wb") as f:
-                        f.write(uploaded_file.getbuffer())
-                    
-                    ftype = "Video" if uploaded_file.name.endswith(('.mp4', '.mov')) else "Image"
-                    current_steps.append({
-                        "image": uploaded_file.name, "title": "", "video_url": "", "icon": "",
-                        "text": f"**Instructions:** Watch the {ftype} above..."
-                    })
+
+            # MOD 1: UPLOAD RAPID (BULK)
+            if add_mode == "📤 Quick Media Upload":
+                st.caption("Upload multiple images or videos instantly.")
+                uploaded_files = st.file_uploader(
+                    f"Choose files:", 
+                    type=['png', 'jpg', 'jpeg', 'mp4', 'mov', 'avi'], 
+                    accept_multiple_files=True
+                )
                 
-                if cat_key not in data: data[cat_key] = {"description": "", "steps": []}
-                data[cat_key]["steps"] = current_steps
-                save_data(data)
-                log_event(f"Added files to {cat_key}")
-                st.success("Steps Added!")
-                st.rerun()
-            
-            st.write("OR")
-            
-            video_input = st.text_input("Add Video URL Step (YouTube/SharePoint):")
-            if st.button("Add URL Step"):
-                if video_input:
-                    current_steps.append({
-                        "image": "", "title": "Video Tutorial", "video_url": video_input, "icon": "",
-                        "text": "**Instructions:** Watch the video..."
-                    })
+                if uploaded_files and st.button("💾 Add Media Steps"):
+                    for uploaded_file in uploaded_files:
+                        file_path = os.path.join(MEDIA_DIR, uploaded_file.name)
+                        with open(file_path, "wb") as f:
+                            f.write(uploaded_file.getbuffer())
+                        
+                        ftype = "Video" if uploaded_file.name.endswith(('.mp4', '.mov')) else "Image"
+                        current_steps.append({
+                            "image": uploaded_file.name, "title": "", "video_url": "", "icon": "",
+                            "text": f"**Instructions:** Watch the {ftype} above..."
+                        })
+                    
                     if cat_key not in data: data[cat_key] = {"description": "", "steps": []}
                     data[cat_key]["steps"] = current_steps
                     save_data(data)
-                    log_event(f"Added URL step to {cat_key}")
-                    st.success("Step Added!")
+                    log_event(f"Added files to {cat_key}")
+                    st.success("Steps Added!")
                     st.rerun()
+            
+            # MOD 2: LINK RAPID
+            elif add_mode == "🔗 Quick Video Link":
+                st.caption("Add a step with a YouTube or SharePoint link.")
+                video_input = st.text_input("Video URL:")
+                if st.button("➕ Add Link Step"):
+                    if video_input:
+                        current_steps.append({
+                            "image": "", "title": "Video Tutorial", "video_url": video_input, "icon": "",
+                            "text": "**Instructions:** Watch the video..."
+                        })
+                        if cat_key not in data: data[cat_key] = {"description": "", "steps": []}
+                        data[cat_key]["steps"] = current_steps
+                        save_data(data)
+                        log_event(f"Added URL step to {cat_key}")
+                        st.success("Step Added!")
+                        st.rerun()
+
+            # MOD 3: CREATOR AVANSAT (CUSTOM)
+            elif add_mode == "✨ Custom Step (Advanced)":
+                with st.container(border=True):
+                    st.info("Create a mixed step: Text + Title + Media (Optional)")
+                    
+                    c_title, c_icon = st.columns([3, 1])
+                    with c_title:
+                        new_step_title = st.text_input("Step Title:", placeholder="e.g. 1. Open Software Center")
+                    with c_icon:
+                        new_step_icon = st.file_uploader("Icon (Optional):", type=['png', 'jpg'])
+                    
+                    new_step_text = st.text_area("Description / Text:", placeholder="Enter step instructions here...")
+                    
+                    st.write("**Attach Media (Choose one):**")
+                    tab_file, tab_url = st.tabs(["📂 File Upload", "🔗 Video URL"])
+                    
+                    with tab_file:
+                        new_step_file = st.file_uploader("Image/Video:", type=['png', 'jpg', 'jpeg', 'mp4', 'mov', 'avi'])
+                    with tab_url:
+                        new_step_url = st.text_input("Or Video Link:", placeholder="https://...")
+
+                    if st.button("➕ Create Custom Step", type="primary"):
+                        # Validare simpla: Sa existe macar ceva
+                        if not new_step_title and not new_step_text and not new_step_file and not new_step_url:
+                             st.error("Please add at least some content (Title, Text, or Media).")
+                        else:
+                            # Construim obiectul pasului
+                            step_data = {
+                                "title": new_step_title,
+                                "text": new_step_text,
+                                "icon": "",
+                                "image": "",
+                                "video_url": ""
+                            }
+                            
+                            # Salvare Icon
+                            if new_step_icon:
+                                icon_path = os.path.join(MEDIA_DIR, new_step_icon.name)
+                                with open(icon_path, "wb") as f: f.write(new_step_icon.getbuffer())
+                                step_data["icon"] = new_step_icon.name
+                                
+                            # Salvare Media (Prioritate: Fisier > URL)
+                            if new_step_file:
+                                f_path = os.path.join(MEDIA_DIR, new_step_file.name)
+                                with open(f_path, "wb") as f: f.write(new_step_file.getbuffer())
+                                step_data["image"] = new_step_file.name
+                            elif new_step_url:
+                                step_data["video_url"] = new_step_url
+                                
+                            current_steps.append(step_data)
+                            
+                            if cat_key not in data: data[cat_key] = {"description": "", "steps": []}
+                            data[cat_key]["steps"] = current_steps
+                            save_data(data)
+                            log_event(f"Added custom step to {cat_key}")
+                            st.success("Custom Step Created!")
+                            st.rerun()
 
             if current_steps:
                 st.markdown("---")
                 st.write("### Edit Content & Reorder")
                 for i, item in enumerate(current_steps):
-                    media_name = item.get('image', 'No File')
-                    if item.get('video_url'): media_name = "Linked Video"
+                    # --- NOU: Etichete Inteligente pentru Expander ---
+                    label_parts = []
+                    if item.get("title"): label_parts.append(f"📌 {item['title']}")
+                    if item.get("image"): label_parts.append("🖼️ Media")
+                    if item.get("video_url"): label_parts.append("🎥 Video")
+                    if not label_parts and item.get("text"): label_parts.append("📝 Text Only")
                     
-                    with st.expander(f"Step {i+1}: {media_name}", expanded=True):
+                    header_label = f"Step {i+1}: " + " | ".join(label_parts) if label_parts else f"Step {i+1}: (Empty)"
+                    # ------------------------------------------------
+                    
+                    with st.expander(header_label, expanded=True):
                         c1, c2 = st.columns([1, 3])
                         with c1:
                             current_icon = item.get('icon', '')
@@ -398,8 +477,15 @@ def show_admin():
                             st.write("---")
                             preview_url = item.get('video_url')
                             if preview_url:
-                                if "sharepoint" in preview_url: st.info("Link")
-                                else: st.video(preview_url)
+                                if "sharepoint" in preview_url: 
+                                    st.info("Link")
+                                else: 
+                                    try:
+                                        st.video(preview_url)
+                                    except Exception:
+                                        st.warning("⚠️ Invalid Video URL")
+                                        st.caption(preview_url)
+
                             if item.get('image'):
                                 fpath = os.path.join(MEDIA_DIR, item['image'])
                                 if os.path.exists(fpath):
@@ -634,7 +720,7 @@ st.sidebar.markdown(
     """
     <div class="sidebar-footer">
         Created by Dinulescu Cosmin Ovidiu<br>
-        v29.0 - Dark/Light
+        v30.0 - Dark/Light
     </div>
     """,
     unsafe_allow_html=True
