@@ -139,9 +139,16 @@
         "outlook": "\ud83d\udce7 3. Outlook & Email",
         "mobile": "\ud83d\udcf1 4. Mobile APN",
         "software_center": "\ud83d\udcbf 5. Software Center",
-        "other": "\ud83d\udcda 6. Other Tutorials"
+        "other": "\ud83d\udcda 6. Other Tutorials",
+        "ticketing": "\ud83d\udee0\ufe0f Service Portal (Ticketing System)"
     },
     "system_logs": [
+        "[2026-01-27 13:33:12] [INFO] Added custom step to ticketing",
+        "[2026-01-27 13:31:03] [INFO] Deleted step in ticketing",
+        "[2026-01-27 13:21:12] [INFO] Admin login: admin",
+        "[2026-01-27 13:13:06] [INFO] Added URL step to ticketing",
+        "[2026-01-27 13:09:46] [INFO] Admin login: admin",
+        "[2026-01-26 15:02:22] [INFO] Admin login: admin",
         "[2025-12-12 09:52:49] [INFO] Added files to other",
         "[2025-12-12 09:52:07] [INFO] Admin login: admin",
         "[2025-12-09 16:52:14] [WARNING] Deleted CATEGORY Enrollment of New Device",
@@ -235,13 +242,19 @@
         "[2025-12-05 15:33:14] [INFO] Replaced media in mobile step 1",
         "[2025-12-05 15:33:14] [INFO] Replaced media in mobile step 1",
         "[2025-12-05 15:33:14] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:13] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:13] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:13] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:13] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:12] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:12] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:12] [INFO] Replaced media in mobile step 1"
+        "[2025-12-05 15:33:13] [INFO] Replaced media in mobile step 1"
     ],
-    "admins": {}
+    "admins": {},
+    "ticketing": {
+        "description": "The Service Portal is your centralized hub for all IT support requests and service management. It serves as the primary interface between employees and the IT Helpdesk, ensuring that every issue is tracked, prioritized, and resolved efficiently.\n\nKey Features:\n\n\ud83c\udfab Submit Tickets: Report technical issues (hardware, software, network) or request new IT services directly.\n\n\ud83d\udcc2 Knowledge Base: Access a library of self-help articles, FAQs, and troubleshooting guides to resolve common problems instantly.\n\n\ud83d\udcca Track Status: Monitor the real-time progress of your open tickets and view historical requests.\n\n\u2705 Approvals: Managers can review and approve access requests or software installations with a single click.\n\nHow to Access:\n\nUse the \"Open TickIT\" button in the browser extension or navigate to the internal portal URL to get started - https://prysmiansd.service-now.com/sp .\n\nTo view ticket status - https://prysmiansd.service-now.com/sp?id=tickets ",
+        "steps": [
+            {
+                "title": "To view ticket status - https://prysmiansd.service-now.com/sp?id=tickets ",
+                "text": "To view ticket status - https://prysmiansd.service-now.com/sp?id=tickets ",
+                "icon": "",
+                "image": "",
+                "video_url": ""
+            }
+        ]
+    }
 }
