@@ -1,1 +1,0 @@
-Pornește serverul (streamlit run induction.py).
