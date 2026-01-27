@@ -139,10 +139,13 @@
         "outlook": "\ud83d\udce7 3. Outlook & Email",
         "mobile": "\ud83d\udcf1 4. Mobile APN",
         "software_center": "\ud83d\udcbf 5. Software Center",
-        "other": "\ud83d\udcda 6. Other Tutorials",
-        "ticketing": "\ud83d\udee0\ufe0f Service Portal (Ticketing System)"
+        "ticketing": "\ud83d\udee0\ufe0f Service Portal (Ticketing System)",
+        "other": "\ud83d\udcda 6. Other Tutorials"
     },
     "system_logs": [
+        "[2026-01-27 16:54:42] [INFO] Admin login: admin",
+        "[2026-01-27 16:45:13] [INFO] Admin login: admin",
+        "[2026-01-27 16:36:34] [INFO] Admin login: admin",
         "[2026-01-27 13:33:12] [INFO] Added custom step to ticketing",
         "[2026-01-27 13:31:03] [INFO] Deleted step in ticketing",
         "[2026-01-27 13:21:12] [INFO] Admin login: admin",
@@ -239,10 +242,7 @@
         "[2025-12-05 15:33:15] [INFO] Replaced media in mobile step 1",
         "[2025-12-05 15:33:15] [INFO] Replaced media in mobile step 1",
         "[2025-12-05 15:33:14] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:14] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:14] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:14] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:13] [INFO] Replaced media in mobile step 1"
+        "[2025-12-05 15:33:14] [INFO] Replaced media in mobile step 1"
     ],
     "admins": {},
     "ticketing": {
