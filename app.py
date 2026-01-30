@@ -21,13 +21,7 @@ if "admin_logged_in" not in st.session_state:
 # Render Sidebar and get selection
 selected_page, search_query, search_results = render_sidebar()
 
-# Handle Query Parameters for direct linking
-query_params = st.query_params
-if "page" in query_params:
-    target = query_params["page"]
-    # Logic to map param to page is handled implicitly by the changing content, 
-    # but the sidebar selection might not sync automatically without rerun. 
-    # For now, we trust the user navigation or sidebar mainly.
+
 
 # --- 4. CONTENT RENDERING ---
 

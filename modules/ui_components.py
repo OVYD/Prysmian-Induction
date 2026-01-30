@@ -41,14 +41,22 @@ def inject_custom_css():
     st.markdown(structural_css, unsafe_allow_html=True)
 
     # 2. THEME CSS
-    # For this "Best Version", we rely heavily on the assets/style.css which is tailored for the Prysmian Dark Theme.
-    # Even if "dark_mode" toggle is present, we prioritize the premium dark look.
+    # Robust path finding for Streamlit Cloud
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    root_dir = os.path.dirname(current_dir) # Go up from modules/ to root
+    css_path = os.path.join(root_dir, "assets", "style.css")
     
-    css_path = os.path.join("assets", "style.css")
+    # Fallback for local CWD execution if needed
+    if not os.path.exists(css_path):
+        css_path = os.path.join("assets", "style.css")
+
     if os.path.exists(css_path):
         with open(css_path, "r") as f:
             custom_css = f.read()
             st.markdown(f'<style>{custom_css}</style>', unsafe_allow_html=True)
+    else:
+        # Debug info if CSS fails to load
+        print(f"WARNING: Could not find style.css at {css_path}")
 
 def render_sidebar():
     st.sidebar.markdown("### Induction Portal")
@@ -71,16 +79,68 @@ def render_sidebar():
     categories = data.get("categories_list", {})
     
     # --- SORTING LOGIC: USE DICTIONARY ORDER ---
-    # We use the order directly from the database (categories_list is an ordered dict in Python 3.7+)
     sorted_names = list(categories.values())
-    
     pages = ["🏠 Home"] + sorted_names
     
     # Check for admin
     if st.session_state.get("admin_logged_in", False):
         pages.append("⚙️ Admin Panel")
+    
+    # --- SYNC LOGIC ---
+    # 1. Map Keys <-> Names
+    key_to_name = categories.copy()
+    key_to_name["home"] = "🏠 Home"
+    key_to_name["admin"] = "⚙️ Admin Panel"
+    
+    name_to_key = {v: k for k, v in key_to_name.items()}
+
+    # 2. Get current URL state
+    current_param_key = st.query_params.get("page", "home")
+    target_name_from_url = key_to_name.get(current_param_key, "🏠 Home")
+    
+    # 3. Ensure Session State matches URL (Source of Truth on Load/Nav)
+    # We use a specific key 'nav_selection' for the widget
+    if "nav_selection" not in st.session_state:
+        st.session_state.nav_selection = target_name_from_url
+    else:
+        # If URL param implies a different page than what's in state,
+        # AND we are not in the middle of a widget interaction (hard to detect directly),
+        # generally we trust the URL if it fundamentally disagrees with the *previous* logic.
+        # However, to avoid fighting:
+        # If the generated key for the CURRENT session selection != URL param,
+        # WE UPDATE THE SESSION STATE to match URL. This handles Back Button.
+        # But we must skip this if the mismatch is because the USER JUST CLICKED.
+        # Streamlit runs the callback BEFORE this script. 
+        # So if user clicked, the callback (defined below) ALREADY updated the URL.
+        # Thus, by the time we get here, URL and Session State SHOULD match.
+        # If they DON'T match here, it means the URL changed externally (Back button).
         
-    selection = st.sidebar.radio("Navigation", pages, label_visibility="collapsed")
+        current_selection_key = name_to_key.get(st.session_state.nav_selection, "home")
+        if current_selection_key != current_param_key:
+             st.session_state.nav_selection = target_name_from_url
+
+    # 4. Callback to update URL when User Clicks
+    def update_url_callback():
+        # Get the new selection from state
+        new_selection = st.session_state.nav_selection
+        new_key = name_to_key.get(new_selection, "home")
+        
+        # Update URL
+        st.query_params["page"] = new_key
+        
+        # Clear step param if switching categories
+        if "step" in st.query_params:
+            del st.query_params["step"]
+
+    # 5. Render Widget
+    # Note: No 'index' argument used! We rely on 'key' and session_state.
+    selection = st.sidebar.radio(
+        "Navigation", 
+        pages, 
+        key="nav_selection", 
+        on_change=update_url_callback,
+        label_visibility="collapsed"
+    )
     
     # --- FOOTER & LOGIN ---
     st.sidebar.markdown("---")
@@ -171,10 +231,13 @@ def render_category_page(category_key):
         step_title = step.get('title', '').strip()
         if not step_title:
             step_title = f"Step {i+1}"
+        
+        # ID for deep linking
+        step_id = f"step-{i+1}"
             
-        # Premium Step Card Structure
+        # Premium Step Card Structure with ID
         st.markdown(f"""
-        <div class="step-container">
+        <div id="{step_id}" class="step-container">
             <div class="step-header">
                 <div class="step-number">{i+1}</div>
                 <h3>{step_title}</h3>
@@ -186,6 +249,8 @@ def render_category_page(category_key):
         
         with c1:
             st.markdown(step.get('text', ''))
+            # Direct Link for sharing
+            st.caption(f"🔗 [Direct Link to Step](?page={category_key}&step={i+1})")
         
         with c2:
             media_file = step.get('image')
@@ -212,3 +277,30 @@ def render_category_page(category_key):
                          st.video(media_path)
                      else:
                         st.image(media_path, use_container_width=True)
+    
+    # --- AUTO-SCROLL SCRIPT ---
+    # Injects JS to scroll to the specific step if 'step' param is in URL
+    st.components.v1.html(
+        """
+        <script>
+            try {
+                // Wait small delay to ensure rendering
+                setTimeout(function() {
+                    const urlParams = new URLSearchParams(window.parent.location.search);
+                    const step = urlParams.get('step');
+                    if (step) {
+                        const elementId = 'step-' + step;
+                        // Search in parent frame (Streamlit structure)
+                        const elements = window.parent.document.querySelectorAll('#' + elementId);
+                        if (elements.length > 0) {
+                            elements[0].scrollIntoView({behavior: "smooth", block: "center"});
+                        }
+                    }
+                }, 500);
+            } catch(e) {
+                console.log("Auto-scroll error:", e);
+            }
+        </script>
+        """, 
+        height=0
+    )
