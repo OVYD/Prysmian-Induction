@@ -17,7 +17,12 @@ def load_data():
         "home": {"logo": "", "text": "# Welcome!\nSelect a guide from the left."},
         "categories_list": DEFAULT_CATEGORIES,
         "system_logs": [],
-        "admins": {}
+        "admins": {},
+        "faq": [
+            {"q": "I cannot login to Outlook.", "a": "Please ensure you have reset your initial password on a Prysmian device first."},
+            {"q": "VPN says 'Gateway Unreachable'.", "a": "Check your internet connection and try switching from WiFi to Mobile Hotspot to test."}
+        ],
+        "feedback_stats": {"helpful": 0, "not_helpful": 0}
     }
 
     if not os.path.exists(DATA_FILE):
@@ -41,6 +46,12 @@ def load_data():
         data_modified = True
     if "admins" not in data:
         data["admins"] = {}
+        data_modified = True
+    if "faq" not in data:
+        data["faq"] = base_structure["faq"]
+        data_modified = True
+    if "feedback_stats" not in data:
+        data["feedback_stats"] = base_structure["feedback_stats"]
         data_modified = True
         
     current_cats = data["categories_list"]

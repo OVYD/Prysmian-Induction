@@ -1,5 +1,5 @@
 import streamlit as st
-from modules.ui_components import inject_custom_css, render_sidebar, render_home_page, render_category_page, render_search_results
+from modules.ui_components import inject_custom_css, render_sidebar, render_home_page, render_category_page, render_search_results, render_faq_page
 from modules.admin import render_admin_panel
 
 # --- 1. SETUP & CONFIGURATION ---
@@ -25,7 +25,7 @@ selected_page, search_query, search_results = render_sidebar()
 
 # --- 4. CONTENT RENDERING ---
 
-# Priority: Search Results -> Admin -> Specific Page -> Home
+# Priority: Search Results -> Admin -> FAQ -> Specific Page -> Home
 if search_query and search_results:
     render_search_results(search_results)
 elif selected_page == "⚙️ Admin Panel":
@@ -35,6 +35,8 @@ elif selected_page == "⚙️ Admin Panel":
         st.error("Access Denied. Please login.")
 elif selected_page == "🏠 Home":
     render_home_page()
+elif selected_page == "❓ FAQ / Help":
+    render_faq_page()
 else:
     # Extract category key from name (or map it)
     # The sidebar returns the Full Name (e.g. "🔐 1. MFA...")

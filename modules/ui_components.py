@@ -80,7 +80,7 @@ def render_sidebar():
     
     # --- SORTING LOGIC: USE DICTIONARY ORDER ---
     sorted_names = list(categories.values())
-    pages = ["🏠 Home"] + sorted_names
+    pages = ["🏠 Home"] + sorted_names + ["❓ FAQ / Help"]
     
     # Check for admin
     if st.session_state.get("admin_logged_in", False):
@@ -90,6 +90,7 @@ def render_sidebar():
     # 1. Map Keys <-> Names
     key_to_name = categories.copy()
     key_to_name["home"] = "🏠 Home"
+    key_to_name["faq"] = "❓ FAQ / Help"
     key_to_name["admin"] = "⚙️ Admin Panel"
     
     name_to_key = {v: k for k, v in key_to_name.items()}
@@ -192,7 +193,40 @@ def render_home_page():
     
     # Wrap in centered container for the rest of the text
     st.markdown(f"<div style='text-align: center;'>{text_content}</div>", unsafe_allow_html=True)
+    st.markdown("---")
     
+    # --- 3. QUICK ACTIONS DASHBOARD ---
+    st.markdown("### 🚀 Quick Start")
+    st.caption("Jump straight to the most useful guides:")
+    
+    col1, col2, col3 = st.columns(3)
+    
+    # Define Quick Actions
+    actions = [
+        {"key": "mfa", "title": "🔐 Setup MFA", "desc": "Configure 2FA for security"},
+        {"key": "vpn", "title": "🛡️ Connect VPN", "desc": "Access internal network"},
+        {"key": "outlook", "title": "📧 Email Setup", "desc": "Configure Outlook & Sig"}
+    ]
+    
+    # Render Cards
+    for i, action in enumerate(actions):
+        with [col1, col2, col3][i]:
+            # We use a button that spans the width, styled as a card via CSS (roughly)
+            # Actually standard buttons are easiest to make functional. 
+            # We simulate the card look with HTML and a hidden button or just a button.
+            # Let's use standard primary buttons for reliability but styled nicely.
+            st.markdown(f"""
+            <div class="home-card">
+                <h3>{action['title']}</h3>
+                <p>{action['desc']}</p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            if st.button(f"Go to {action['key'].upper()}", key=f"btn_home_{action['key']}", use_container_width=True):
+                 st.session_state.nav_selection = data["categories_list"].get(action['key'], "🏠 Home")
+                 st.query_params["page"] = action["key"]
+                 st.rerun()
+
     st.markdown("---")
     st.info("👈 Please select a guide from the sidebar to get started.")
 
@@ -211,6 +245,21 @@ def render_search_results(results):
                 if st.button("Go to \u2794", key=f"search_{res['title']}_{res['location']}_{res.get('step_index', 'main')}"):
                     st.query_params["page"] = res["location"]
                     st.rerun()
+
+def render_faq_page():
+    st.title("❓ Frequently Asked Questions")
+    st.caption("Common solutions for induction problems.")
+    
+    data = load_data()
+    faqs = data.get("faq", [])
+    
+    if not faqs:
+        st.info("No FAQs yet.")
+        return
+
+    for i, item in enumerate(faqs):
+        with st.expander(f"Q: {item.get('q', 'Question')}"):
+            st.write(item.get('a', 'Answer'))
 
 def render_category_page(category_key):
     data = load_data()
@@ -234,10 +283,14 @@ def render_category_page(category_key):
         
         # ID for deep linking
         step_id = f"step-{i+1}"
+        
+        # Check completion status
+        is_completed = step_id in st.session_state.get(f"progress_{category_key}", [])
+        container_class = "step-container completed" if is_completed else "step-container"
             
         # Premium Step Card Structure with ID
         st.markdown(f"""
-        <div id="{step_id}" class="step-container">
+        <div id="{step_id}" class="{container_class}">
             <div class="step-header">
                 <div class="step-number">{i+1}</div>
                 <h3>{step_title}</h3>
@@ -249,8 +302,24 @@ def render_category_page(category_key):
         
         with c1:
             st.markdown(step.get('text', ''))
-            # Direct Link for sharing
-            st.caption(f"🔗 [Direct Link to Step](?page={category_key}&step={i+1})")
+            
+            # --- PROGRESS & SHARING ---
+            sc1, sc2 = st.columns([1, 1])
+            with sc1:
+                # MARK AS DONE BUTTON
+                btn_label = "✅ Completed" if is_completed else "⭕ Mark as Done"
+                if st.button(btn_label, key=f"done_{category_key}_{i}"):
+                    current_prog = st.session_state.get(f"progress_{category_key}", [])
+                    if step_id in current_prog:
+                        current_prog.remove(step_id)
+                    else:
+                        current_prog.append(step_id)
+                    st.session_state[f"progress_{category_key}"] = current_prog
+                    st.rerun()
+            
+            with sc2:
+                 # Direct Link for sharing
+                 st.caption(f"🔗 [Direct Link](?page={category_key}&step={i+1})")
         
         with c2:
             media_file = step.get('image')
@@ -275,8 +344,19 @@ def render_category_page(category_key):
                  if os.path.exists(media_path):
                      if media_path.lower().endswith(('.mp4', '.mov')):
                          st.video(media_path)
-                     else:
                         st.image(media_path, use_container_width=True)
+    
+    # --- FEEDBACK SECTION ---
+    st.divider()
+    st.caption("Was this guide helpful?")
+    fc1, fc2, fc3 = st.columns([1, 1, 5])
+    with fc1:
+        if st.button("👍 Yes", key=f"fb_yes_{category_key}"):
+            st.toast("Thank you for your feedback!", icon="🎉")
+             # Ideally we would log this to a file
+    with fc2:
+        if st.button("👎 No", key=f"fb_no_{category_key}"):
+            st.toast("We'll try to improve.", icon="🔧")
     
     # --- AUTO-SCROLL SCRIPT ---
     # Injects JS to scroll to the specific step if 'step' param is in URL

@@ -224,3 +224,63 @@ a {
 ::-webkit-scrollbar-thumb:hover {
     background: #00D2BE;
 }
+
+/* --- NEW FEATURES CSS --- */
+
+/* 1. HOME QUICK ACTIONS (Cards) */
+.home-card {
+    background: linear-gradient(145deg, rgba(28, 36, 52, 0.9) 0%, rgba(20, 26, 38, 0.9) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    height: 100%;
+}
+
+.home-card:hover {
+    transform: translateY(-5px);
+    border-color: #00D2BE;
+    box-shadow: 0 10px 20px rgba(0, 210, 190, 0.15);
+}
+
+.home-card h3 {
+    margin-top: 10px !important;
+    font-size: 1.1rem;
+}
+
+.home-card p {
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+/* 2. PROGRESS TRACKING */
+.step-container.completed {
+    border-color: #00B140;
+    /* Green border */
+    background: rgba(0, 177, 64, 0.05);
+    /* Very subtle green tint */
+}
+
+.step-container.completed .step-number {
+    background: #00B140;
+    /* Solid Green */
+    box-shadow: 0 0 10px rgba(0, 177, 64, 0.4);
+}
+
+.step-container.completed .step-header h3::after {
+    content: " ✓ Completed";
+    font-size: 0.8rem;
+    color: #00B140;
+    margin-left: 10px;
+    opacity: 0.8;
+}
+
+/* 3. FAQ ACCORDION STYLING */
+/* Streamlit text in expander */
+.streamlit-expanderHeader {
+    background-color: rgba(255, 255, 255, 0.02) !important;
+    border-radius: 8px !important;
+}
