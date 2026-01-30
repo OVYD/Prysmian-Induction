@@ -256,5 +256,19 @@
                 "video_url": ""
             }
         ]
+    },
+    "faq": [
+        {
+            "q": "I cannot login to Outlook.",
+            "a": "Please ensure you have reset your initial password on a Prysmian device first."
+        },
+        {
+            "q": "VPN says 'Gateway Unreachable'.",
+            "a": "Check your internet connection and try switching from WiFi to Mobile Hotspot to test."
+        }
+    ],
+    "feedback_stats": {
+        "helpful": 0,
+        "not_helpful": 0
     }
 }

@@ -227,6 +227,30 @@ def render_home_page():
                  st.query_params["page"] = action["key"]
                  st.rerun()
 
+    # --- 4. BROWSER EXTENSION ---
+    st.markdown("---")
+    c_ext1, c_ext2 = st.columns([2, 1])
+    with c_ext1:
+        st.subheader("🧩 New: Induction Helper Extension")
+        st.write("Get quick access to guides directly from your browser toolbar. Includes instant search and deep linking.")
+        
+        # Download Logic
+        ext_path = os.path.join("documents", "InductionExtension.zip")
+        if os.path.exists(ext_path):
+            with open(ext_path, "rb") as f:
+                st.download_button(
+                    label="📥 Download Extension (.zip)",
+                    data=f,
+                    file_name="InductionExtension.zip",
+                    mime="application/zip",
+                    type="primary"
+                )
+        else:
+            st.warning("Extension package not found.")
+            
+    with c_ext2:
+        st.info("**Installation:**\n1. Download & Unzip.\n2. Go to `chrome://extensions`\n3. Enable 'Developer Mode'.\n4. Click 'Load Unpacked' and select folder.")
+
     st.markdown("---")
     st.info("👈 Please select a guide from the sidebar to get started.")
 
