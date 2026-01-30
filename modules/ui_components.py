@@ -342,8 +342,9 @@ def render_category_page(category_key):
             if media_file:
                  media_path = os.path.join(MEDIA_DIR, media_file)
                  if os.path.exists(media_path):
-                     if media_path.lower().endswith(('.mp4', '.mov')):
+                     elif media_path.lower().endswith(('.mp4', '.mov')):
                          st.video(media_path)
+                     else:
                         st.image(media_path, use_container_width=True)
     
     # --- FEEDBACK SECTION ---
