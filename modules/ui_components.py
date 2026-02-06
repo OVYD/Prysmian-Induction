@@ -181,7 +181,23 @@ def render_sidebar():
     
     # --- SEARCH BOX ---
     st.sidebar.markdown("---")
-    query = st.sidebar.text_input("🔍 Search Guide...", placeholder="e.g. VPN, Outlook")
+    
+    # Use a counter-based key to force widget recreation when clearing
+    if "search_key_counter" not in st.session_state:
+        st.session_state.search_key_counter = 0
+    
+    # Check if we need to clear search (set by navigation buttons)
+    if st.session_state.get("clear_search", False):
+        st.session_state.clear_search = False
+        st.session_state.search_key_counter += 1  # Increment to get new widget
+    
+    # Text input with dynamic key - changing key creates fresh widget
+    query = st.sidebar.text_input(
+        "🔍 Search Guide...", 
+        placeholder="e.g. VPN, Outlook",
+        key=f"search_input_{st.session_state.search_key_counter}"
+    )
+    
     search_results = []
     if query:
         search_results = search_content(query)
@@ -243,6 +259,10 @@ def render_sidebar():
         # Get the new selection from state
         new_selection = st.session_state.nav_selection
         new_key = name_to_key.get(new_selection, "home")
+        
+        # Clear search when navigating
+        st.session_state.clear_search = True
+        st.session_state.current_search = ""  # Also clear current value
         
         # Update URL
         st.query_params["page"] = new_key
@@ -391,6 +411,7 @@ def render_search_results(results):
              with c2:
                  # Big Primary Action Button
                  if st.button(f"Go to {top_result['title']} \u2794", key="s_best_match", type="primary", use_container_width=True):
+                     st.session_state.clear_search = True  # Clear search on next run
                      st.query_params["page"] = top_result["location"]
                      st.rerun()
          
@@ -415,6 +436,7 @@ def render_search_item(res):
                 st.caption(f"Type: {res['type']}")
             with c2:
                 if st.button("Go to \u2794", key=f"search_{res['title']}_{res['location']}_{res.get('step_index', 'main')}"):
+                    st.session_state.clear_search = True  # Clear search on next run
                     st.query_params["page"] = res["location"]
                     # If it's a step, add step param? Current search.py logic might need tweak if we want direct step link
                     # For now just going to page is safe.

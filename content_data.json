@@ -187,27 +187,27 @@
         },
         {
             "q": "VPN shows 'Gateway Unreachable'.",
-            "a": "1. Check your internet connection.\\n2. Try switching from WiFi to Mobile Hotspot.\\n3. Ensure the correct client certificate is selected (Your Name / ModernSubCA01-03).\\n4. If the issue persists, contact IT Helpdesk."
+            "a": "1. Check your internet connection. 2. Try switching from WiFi to Mobile Hotspot. 3. Ensure the correct client certificate is selected (Your Name / ModernSubCA01-03). 4. If the issue persists, contact IT Helpdesk."
         },
         {
             "q": "How do I configure MFA (two-factor authentication)?",
-            "a": "1. Go to https://myaccount.microsoft.com/\\n2. Click on 'Security info'\\n3. Add Microsoft Authenticator as primary method\\n4. Scan the QR code with the Authenticator app\\n5. We recommend also adding a phone number as a backup method."
+            "a": "1. Go to https://myaccount.microsoft.com/ 2. Click on 'Security info' 3. Add Microsoft Authenticator as primary method 4. Scan the QR code with the Authenticator app 5. We recommend also adding a phone number as a backup method."
         },
         {
             "q": "How do I configure APN on my mobile phone?",
-            "a": "The APN setting for Prysmian is: netmon.vodafone.it\\n\\nAndroid: Settings > Connections > Mobile Networks > Access Point Names > Add\\niOS: Settings > Cellular > Cellular Data Network > APN"
+            "a": "The APN setting for Prysmian is: netmon.vodafone.it | Android: Settings > Connections > Mobile Networks > Access Point Names > Add | iOS: Settings > Cellular > Cellular Data Network > APN"
         },
         {
             "q": "Where do I find Software Center?",
-            "a": "1. Open the Start Menu\\n2. Search for 'Software Center'\\n3. Navigate to the 'Applications' tab\\n4. Install the apps you need without administrator rights."
+            "a": "1. Open the Start Menu 2. Search for 'Software Center' 3. Navigate to the 'Applications' tab 4. Install the apps you need without administrator rights."
         },
         {
             "q": "How do I open an IT ticket?",
-            "a": "1. Use the 'Need Help?' button in the app (opens TickIT in Teams)\\n2. Or go directly to: https://prysmiansd.service-now.com/sp\\n3. Fill out the form with details about your issue."
+            "a": "1. Use the 'Need Help?' button in the app (opens TickIT in Teams) 2. Or go directly to: https://prysmiansd.service-now.com/sp 3. Fill out the form with details about your issue."
         },
         {
             "q": "Outlook doesn't save my signature.",
-            "a": "1. Go to File > Options > Mail > Signatures\\n2. Create a new signature\\n3. IMPORTANT: Under 'Choose default signature' select the signature for BOTH 'New messages' AND 'Replies/forwards'\\n4. Click OK to save."
+            "a": "1. Go to File > Options > Mail > Signatures 2. Create a new signature 3. IMPORTANT: Under 'Choose default signature' select the signature for BOTH 'New messages' AND 'Replies/forwards' 4. Click OK to save."
         },
         {
             "q": "I can't send MMS or access internet on my phone.",
