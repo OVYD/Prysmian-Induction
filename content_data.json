@@ -130,17 +130,25 @@
         "text": "# Welcome to Prysmian!\n\n**Prysmian** is the world leader in the energy and telecom cable systems industry. With a strong presence in over 50 countries, we are the driving force behind the global energy transition and digital transformation.\n\n### Our Mission\nTo provide superior cable solutions based on state-of-the-art technology and consistent excellence in execution, ultimately **connecting the world**."
     },
     "software_center": {
-        "description": "",
-        "steps": []
+        "description": "**Software Center** is Microsoft's enterprise application portal, integrated through **System Center Configuration Manager (SCCM)**. It allows you to install approved software directly on your work computer without needing administrator rights or IT assistance.\n\n**Key Features:**\n\n🖥️ **Self-Service Installation**: Browse and install applications independently.\n\n⏱️ **Scheduled Updates**: Software updates are automatically managed by IT.\n\n✅ **Pre-Approved Apps**: All software in the catalog is security-vetted and license-compliant.\n\n📊 **Installation Status**: Track download and installation progress in real-time.\n\n**How to Access:**\n\n1. Open the **Start Menu**\n2. Search for **Software Center**\n3. Browse the **Applications** tab",
+        "estimated_time": 3,
+        "steps": [
+            {
+                "title": "Available Applications",
+                "text": "Below is the list of applications available for self-service installation:\n\n**Productivity & Office:**\n- Microsoft Office 365 Suite (2408 64 bit)\n- SAP Analysis for Microsoft Office\n- SAP BPC EPM 10 SP24P\n- SAP GUI 8.00\n- Minitab 22\n\n**Communication:**\n- Jabra Xpress\n- Voice for Windows (Avaya)\n- Cisco Jabber\n\n**Development & Engineering:**\n- Java JRE 8\n- Solid Edge 2020\n- Autodesk DWG TrueView 2020\n- Autodesk Design Review 2021\n\n**Graphics & Media:**\n- Paint.NET 5\n- Inkscape\n- Greenshot\n- K-Lite Codec Pack\n- OpenShot Video Editor\n\n**Utilities:**\n- DMS\n- QlikView Desktop\n- Dameware Agent\n- Access Runtime\n- IBM Access Client\n- Jetmark 5\n\n**Database:**\n- Oracle Database Client 12\n- Oracle Tnsnames 64\n- Oracle SmartView 21\n\n**Remote Support:**\n- Dameware Mini Remote Control\n\n**Viewers & Editors:**\n- eDrawings Viewer 2021\n- Embedded PDF Extractor\n\n**SAP & Business:**\n- Sinbad Configuration 2.5\n- Infor LN",
+                "image": "",
+                "icon": ""
+            }
+        ]
     },
     "categories_list": {
-        "mfa": "\ud83d\udd10 1. MFA (Microsoft 2FA)",
-        "vpn": "\ud83d\udee1\ufe0f 2. VPN Config",
-        "outlook": "\ud83d\udce7 3. Outlook & Email",
-        "mobile": "\ud83d\udcf1 4. Mobile APN",
-        "software_center": "\ud83d\udcbf 5. Software Center",
-        "ticketing": "\ud83d\udee0\ufe0f Service Portal (Ticketing System)",
-        "other": "\ud83d\udcda 6. Other Tutorials"
+        "mfa": "🔐 1. MFA (Microsoft 2FA)",
+        "vpn": "🛡️ 2. VPN Config",
+        "outlook": "📧 3. Outlook & Email",
+        "mobile": "📱 4. Mobile APN",
+        "software_center": "💿 5. Software Center",
+        "ticketing": "🛠️ Service Portal (Ticketing System)",
+        "other": "📚 6. Other Tutorials"
     },
     "system_logs": [
         "[2026-02-06 09:39:12] [INFO] Admin login: admin",
@@ -157,96 +165,11 @@
         "[2026-01-27 13:09:46] [INFO] Admin login: admin",
         "[2026-01-26 15:02:22] [INFO] Admin login: admin",
         "[2025-12-12 09:52:49] [INFO] Added files to other",
-        "[2025-12-12 09:52:07] [INFO] Admin login: admin",
-        "[2025-12-09 16:52:14] [WARNING] Deleted CATEGORY Enrollment of New Device",
-        "[2025-12-09 16:40:20] [INFO] Admin login: admin",
-        "[2025-12-09 09:25:11] [INFO] Admin login: admin",
-        "[2025-12-08 15:03:55] [INFO] Admin login: admin",
-        "[2025-12-08 10:43:48] [INFO] Admin login: admin",
-        "[2025-12-08 10:32:27] [INFO] Admin login: admin",
-        "[2025-12-08 10:00:24] [INFO] Admin login: admin",
-        "[2025-12-05 15:33:34] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:34] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:34] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:33] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:33] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:33] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:33] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:32] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:32] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:32] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:32] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:31] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:31] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:31] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:31] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:30] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:30] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:30] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:30] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:29] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:29] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:29] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:29] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:28] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:28] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:28] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:28] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:27] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:27] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:27] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:27] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:26] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:26] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:26] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:26] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:25] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:25] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:25] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:25] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:24] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:24] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:24] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:24] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:23] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:23] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:23] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:23] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:22] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:22] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:22] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:22] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:21] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:21] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:21] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:21] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:20] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:20] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:20] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:20] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:19] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:19] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:19] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:19] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:18] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:18] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:18] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:18] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:18] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:17] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:17] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:17] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:17] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:16] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:16] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:16] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:16] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:15] [INFO] Replaced media in mobile step 1",
-        "[2025-12-05 15:33:15] [INFO] Replaced media in mobile step 1"
+        "[2025-12-12 09:52:07] [INFO] Admin login: admin"
     ],
     "admins": {},
     "ticketing": {
-        "description": "The Service Portal is your centralized hub for all IT support requests and service management. It serves as the primary interface between employees and the IT Helpdesk, ensuring that every issue is tracked, prioritized, and resolved efficiently.\n\nKey Features:\n\n\ud83c\udfab Submit Tickets: Report technical issues (hardware, software, network) or request new IT services directly.\n\n\ud83d\udcc2 Knowledge Base: Access a library of self-help articles, FAQs, and troubleshooting guides to resolve common problems instantly.\n\n\ud83d\udcca Track Status: Monitor the real-time progress of your open tickets and view historical requests.\n\n\u2705 Approvals: Managers can review and approve access requests or software installations with a single click.\n\nHow to Access:\n\nUse the \"Open TickIT\" button in the browser extension or navigate to the internal portal URL to get started - https://prysmiansd.service-now.com/sp .\n\nTo view ticket status - https://prysmiansd.service-now.com/sp?id=tickets ",
+        "description": "The Service Portal is your centralized hub for all IT support requests and service management. It serves as the primary interface between employees and the IT Helpdesk, ensuring that every issue is tracked, prioritized, and resolved efficiently.\n\nKey Features:\n\n🎫 Submit Tickets: Report technical issues (hardware, software, network) or request new IT services directly.\n\n📂 Knowledge Base: Access a library of self-help articles, FAQs, and troubleshooting guides to resolve common problems instantly.\n\n📊 Track Status: Monitor the real-time progress of your open tickets and view historical requests.\n\n✅ Approvals: Managers can review and approve access requests or software installations with a single click.\n\nHow to Access:\n\nUse the \"Open TickIT\" button in the browser extension or navigate to the internal portal URL to get started - https://prysmiansd.service-now.com/sp .\n\nTo view ticket status - https://prysmiansd.service-now.com/sp?id=tickets ",
         "steps": [
             {
                 "title": "To view ticket status - https://prysmiansd.service-now.com/sp?id=tickets ",
@@ -259,12 +182,36 @@
     },
     "faq": [
         {
-            "q": "I cannot login to Outlook.",
-            "a": "Please ensure you have reset your initial password on a Prysmian device first."
+            "q": "I cannot log into Outlook.",
+            "a": "Make sure you have reset your initial password on a Prysmian device first. If the issue persists, check your internet connection and try logging into Outlook Web: https://outlook.office365.com"
         },
         {
-            "q": "VPN says 'Gateway Unreachable'.",
-            "a": "Check your internet connection and try switching from WiFi to Mobile Hotspot to test."
+            "q": "VPN shows 'Gateway Unreachable'.",
+            "a": "1. Check your internet connection.\\n2. Try switching from WiFi to Mobile Hotspot.\\n3. Ensure the correct client certificate is selected (Your Name / ModernSubCA01-03).\\n4. If the issue persists, contact IT Helpdesk."
+        },
+        {
+            "q": "How do I configure MFA (two-factor authentication)?",
+            "a": "1. Go to https://myaccount.microsoft.com/\\n2. Click on 'Security info'\\n3. Add Microsoft Authenticator as primary method\\n4. Scan the QR code with the Authenticator app\\n5. We recommend also adding a phone number as a backup method."
+        },
+        {
+            "q": "How do I configure APN on my mobile phone?",
+            "a": "The APN setting for Prysmian is: netmon.vodafone.it\\n\\nAndroid: Settings > Connections > Mobile Networks > Access Point Names > Add\\niOS: Settings > Cellular > Cellular Data Network > APN"
+        },
+        {
+            "q": "Where do I find Software Center?",
+            "a": "1. Open the Start Menu\\n2. Search for 'Software Center'\\n3. Navigate to the 'Applications' tab\\n4. Install the apps you need without administrator rights."
+        },
+        {
+            "q": "How do I open an IT ticket?",
+            "a": "1. Use the 'Need Help?' button in the app (opens TickIT in Teams)\\n2. Or go directly to: https://prysmiansd.service-now.com/sp\\n3. Fill out the form with details about your issue."
+        },
+        {
+            "q": "Outlook doesn't save my signature.",
+            "a": "1. Go to File > Options > Mail > Signatures\\n2. Create a new signature\\n3. IMPORTANT: Under 'Choose default signature' select the signature for BOTH 'New messages' AND 'Replies/forwards'\\n4. Click OK to save."
+        },
+        {
+            "q": "I can't send MMS or access internet on my phone.",
+            "a": "The APN is not configured correctly. Set the APN to: netmon.vodafone.it (leave Username and Password empty). Restart the phone after configuration."
         }
     ],
     "feedback_stats": {

@@ -150,7 +150,7 @@ def inject_custom_css():
     help_button_html = f"""
     <div class="help-button-container">
         <a href="{tickit_url}" target="_blank" class="help-button">
-            💬 Ai nevoie de ajutor?
+            💬 Need Help?
         </a>
     </div>
     """
@@ -342,7 +342,7 @@ def render_home_page():
             """, unsafe_allow_html=True)
             
             if st.button(f"Go to {action['key'].upper()}", key=f"btn_home_{action['key']}", use_container_width=True):
-                 st.session_state.nav_selection = data["categories_list"].get(action['key'], "🏠 Home")
+                 # Set URL param - the sidebar will sync from this
                  st.query_params["page"] = action["key"]
                  st.rerun()
 
@@ -468,7 +468,7 @@ def render_category_page(category_key):
     st.markdown(f"""
     <div class="progress-container">
         <div class="progress-info">
-            <span>📊 Progres: {completed_count} din {total_steps} pași</span>
+            <span>📊 Progress: {completed_count} of {total_steps} steps</span>
             <span class="progress-pct">{progress_pct}%</span>
         </div>
         <div class="progress-bar-bg">
@@ -560,22 +560,22 @@ def render_category_page(category_key):
         st.balloons()
         st.markdown(f"""
         <div class="celebration-banner">
-            <h3>🎉 Felicitări!</h3>
-            <p>Ai finalizat toți cei {total_steps} pași din acest ghid!</p>
+            <h3>🎉 Congratulations!</h3>
+            <p>You have completed all {total_steps} steps in this guide!</p>
         </div>
         """, unsafe_allow_html=True)
     
     # --- FEEDBACK SECTION ---
     st.divider()
-    st.caption("Ți-a fost util acest ghid?")
+    st.caption("Was this guide helpful?")
     fc1, fc2, fc3 = st.columns([1, 1, 5])
     with fc1:
-        if st.button("👍 Da", key=f"fb_yes_{category_key}"):
-            st.toast("Mulțumim pentru feedback!", icon="🎉")
+        if st.button("👍 Yes", key=f"fb_yes_{category_key}"):
+            st.toast("Thanks for your feedback!", icon="🎉")
              # Ideally we would log this to a file
     with fc2:
-        if st.button("👎 Nu", key=f"fb_no_{category_key}"):
-            st.toast("Vom încerca să îmbunătățim.", icon="🔧")
+        if st.button("👎 No", key=f"fb_no_{category_key}"):
+            st.toast("We'll try to improve.", icon="🔧")
     
     # --- AUTO-SCROLL SCRIPT ---
     # Injects JS to scroll to the specific step if 'step' param is in URL
