@@ -5,7 +5,7 @@ import os
 # Fix for Streamlit Cloud "ModuleNotFoundError"
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from modules.ui_components import inject_custom_css, render_sidebar, render_home_page, render_category_page, render_search_results
+from modules.ui_components import inject_custom_css, render_sidebar, render_home_page, render_category_page, render_search_results, render_faq_page
 from modules.admin import render_admin_panel
 
 # --- 1. SETUP & CONFIGURATION ---
@@ -41,6 +41,8 @@ elif selected_page == "⚙️ Admin Panel":
         st.error("Access Denied. Please login.")
 elif selected_page == "🏠 Home":
     render_home_page()
+elif selected_page == "❓ FAQ / Help":
+    render_faq_page()
 else:
     # Extract category key from name (or map it)
     # The sidebar returns the Full Name (e.g. "🔐 1. MFA...")
