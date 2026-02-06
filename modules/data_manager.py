@@ -13,7 +13,7 @@ DEFAULT_CATEGORIES = {
     "other": "📚 6. Other Tutorials"
 }
 
-@st.cache_data(show_spinner=False)
+@st.cache_data(show_spinner=False, ttl=5)
 def load_data():
     base_structure = {
         "home": {"logo": "", "text": "# Welcome!\nSelect a guide from the left."},
@@ -32,7 +32,7 @@ def load_data():
             json.dump(base_structure, f)
         return base_structure
     
-    with open(DATA_FILE, "r") as f:
+    with open(DATA_FILE, "r", encoding="utf-8") as f:
         data = json.load(f)
     
     data_modified = False
