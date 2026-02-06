@@ -1,18 +1,41 @@
 /* Global Styles for Prysmian Theme (New Identity) */
 /* Fonts are handled by structural_css in ui_components.py */
 
-/* --- COLOR VARIABLES --- */
-/* Primary Background: #1C2434 (Dark Blue/Ebony Clay variant from new brand) */
-/* Sidebar Background: #141A26 (Darker shade) */
-/* Brand Gradient: Linear Gradient from #00D2BE (Cyan) to #00B140 (Green) */
-/* Text White: #FFFFFF */
+/* === THEME VARIABLES === */
+:root {
+    /* Dark Theme (Default) */
+    --bg-primary: #1C2434;
+    --bg-secondary: #111621;
+    --bg-sidebar: #141A26;
+    --text-primary: #FFFFFF;
+    --text-secondary: #E2E8F0;
+    --text-muted: #94A3B8;
+    --accent-cyan: #00D2BE;
+    --accent-green: #00B140;
+    --border-color: rgba(0, 210, 190, 0.1);
+    --card-bg: rgba(255, 255, 255, 0.03);
+    --input-bg: rgba(0, 0, 0, 0.3);
+}
+
+/* Light Theme Override */
+.light-theme {
+    --bg-primary: #F8FAFC;
+    --bg-secondary: #FFFFFF;
+    --bg-sidebar: #F1F5F9;
+    --text-primary: #1E293B;
+    --text-secondary: #475569;
+    --text-muted: #64748B;
+    --border-color: rgba(0, 177, 64, 0.2);
+    --card-bg: rgba(0, 0, 0, 0.02);
+    --input-bg: rgba(0, 0, 0, 0.05);
+}
 
 /* MAIN APP CONTAINER */
 .stApp,
 div[data-testid="stAppViewContainer"] {
-    background-color: #1C2434 !important;
-    background: linear-gradient(180deg, #1C2434 0%, #111621 100%) !important;
-    color: #FFFFFF;
+    background-color: var(--bg-primary) !important;
+    background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%) !important;
+    color: var(--text-primary);
 }
 
 /* SIDEBAR */
@@ -270,13 +293,7 @@ a {
     box-shadow: 0 0 10px rgba(0, 177, 64, 0.4);
 }
 
-.step-container.completed .step-header h3::after {
-    content: " ✓ Completed";
-    font-size: 0.8rem;
-    color: #00B140;
-    margin-left: 10px;
-    opacity: 0.8;
-}
+/* Removed completed indicator - green border already shows status */
 
 /* 3. FAQ ACCORDION STYLING */
 /* Streamlit text in expander */
@@ -514,5 +531,136 @@ a {
     .stButton>button {
         min-height: 44px;
         padding: 12px 20px;
+    }
+}
+
+/* ========================================
+   PRINT STYLES
+   ======================================== */
+@media print {
+
+    /* Force white background everywhere */
+    * {
+        background: white !important;
+        background-color: white !important;
+        color: black !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* Main container */
+    .stApp,
+    div[data-testid="stAppViewContainer"],
+    div[data-testid="stMainBlockContainer"],
+    .main,
+    .block-container {
+        background: white !important;
+        color: black !important;
+    }
+
+    /* Hide sidebar when printing */
+    section[data-testid="stSidebar"],
+    [data-testid="stSidebar"] {
+        display: none !important;
+    }
+
+    /* Hide interactive elements */
+    .stButton,
+    .help-button-container,
+    .stTextInput,
+    button,
+    iframe,
+    .progress-container,
+    .breadcrumbs {
+        display: none !important;
+    }
+
+    /* Make ALL text readable */
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p,
+    span,
+    li,
+    div,
+    label,
+    .stMarkdown,
+    div[data-testid="stMarkdownContainer"],
+    div[data-testid="stMarkdownContainer"] p,
+    div[data-testid="stMarkdownContainer"] span {
+        color: black !important;
+        -webkit-text-fill-color: black !important;
+        background: transparent !important;
+    }
+
+    /* Step containers - light gray for visibility */
+    .step-container,
+    .step-container.completed {
+        background: #f8f8f8 !important;
+        border: 2px solid #333 !important;
+        padding: 15px !important;
+        margin-bottom: 20px !important;
+        page-break-inside: avoid;
+    }
+
+    /* Step header */
+    .step-header {
+        border-bottom: 1px solid #ccc !important;
+        padding-bottom: 10px !important;
+        margin-bottom: 10px !important;
+    }
+
+    .step-header h3 {
+        color: black !important;
+        -webkit-text-fill-color: black !important;
+        font-size: 16pt !important;
+    }
+
+    /* Step number circle - dark for contrast */
+    .step-number {
+        background: #333 !important;
+        color: white !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* Images */
+    img {
+        max-width: 100% !important;
+        page-break-inside: avoid;
+        border: 1px solid #ddd !important;
+    }
+
+    /* Links - show URL */
+    a {
+        color: #0066cc !important;
+        text-decoration: underline !important;
+    }
+
+    /* Category title */
+    .stHeader,
+    header h1,
+    header h2 {
+        color: black !important;
+        -webkit-text-fill-color: black !important;
+    }
+
+    /* Info boxes */
+    div[data-testid="stAlert"] {
+        background: #f0f0f0 !important;
+        border: 1px solid #ccc !important;
+        color: black !important;
+    }
+
+    /* PRINT-ONLY IMAGES - Show these for printing */
+    .print-only-image {
+        display: block !important;
+        max-width: 100% !important;
+        margin: 10px 0 !important;
+        border: 1px solid #ccc !important;
+        border-radius: 4px !important;
     }
 }

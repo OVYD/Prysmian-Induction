@@ -2,7 +2,12 @@ import streamlit as st
 import os
 import base64
 import time
-from modules.data_manager import load_data
+from modules.data_manager import (
+    load_data, save_step_feedback, save_user_progress, load_user_progress, 
+    save_bookmark, load_bookmarks, track_page_view, track_completion,
+    get_quiz, save_quiz_result, get_quiz_result, get_user_profile,
+    get_user_completion_status
+)
 from modules.search import search_content
 from modules.auth import login_sidebar
 
@@ -193,8 +198,8 @@ def render_sidebar():
     
     # Text input with dynamic key - changing key creates fresh widget
     query = st.sidebar.text_input(
-        "🔍 Search Guide...", 
-        placeholder="e.g. VPN, Outlook",
+        "🔍 Search guide...", 
+        placeholder="VPN, MFA, Outlook...",
         key=f"search_input_{st.session_state.search_key_counter}"
     )
     
@@ -281,6 +286,45 @@ def render_sidebar():
         on_change=update_url_callback,
         label_visibility="collapsed"
     )
+    
+    # --- MY BOOKMARKS SECTION ---
+    user_bookmarks = load_bookmarks()
+    if user_bookmarks:
+        st.sidebar.markdown("---")
+        with st.sidebar.expander(f"⭐ My Bookmarks ({len(user_bookmarks)})", expanded=False):
+            data = load_data()
+            categories = data.get("categories_list", {})
+            
+            for bm in user_bookmarks:
+                # Parse bookmark key: "category_step_index"
+                parts = bm.split("_step_")
+                if len(parts) != 2:
+                    continue
+                    
+                cat_key, step_idx = parts[0], parts[1]
+                cat_name = categories.get(cat_key, cat_key)
+                
+                # Get step title
+                try:
+                    step_data = data.get(cat_key, {}).get("steps", [])
+                    step_title = step_data[int(step_idx)].get("title", f"Step {int(step_idx) + 1}")
+                    if not step_title:
+                        step_title = f"Step {int(step_idx) + 1}"
+                except:
+                    step_title = f"Step {int(step_idx) + 1}"
+                
+                # Navigation button
+                if st.button(f"📌 {step_title[:25]}...", key=f"bm_nav_{bm}", help=f"{cat_name}", use_container_width=True):
+                    st.query_params["page"] = cat_key
+                    st.query_params["step"] = str(int(step_idx) + 1)
+                    st.rerun()
+    
+    # --- USER PROFILE (Azure SSO) ---
+    # User profile is auto-populated from Azure SSO authentication
+    # No manual registration needed - email comes from SSO token
+    user_profile = get_user_profile()
+    if user_profile:
+        st.sidebar.success(f"✅ {user_profile.get('name', user_profile.get('email', 'User'))}")
     
     # --- FOOTER & LOGIN ---
     st.sidebar.markdown("---")
@@ -392,6 +436,45 @@ def render_home_page():
 
     st.markdown("---")
     st.info("👈 Please select a guide from the sidebar to get started.")
+    
+    # --- 5. COMPLETION CERTIFICATE ---
+    st.markdown("---")
+    from modules.certificate import can_get_certificate, generate_certificate
+    
+    can_cert, cert_msg = can_get_certificate()
+    
+    c_cert1, c_cert2 = st.columns([2, 1])
+    with c_cert1:
+        st.subheader("🎓 Completion Certificate")
+        if can_cert:
+            st.success("Congratulations! You have completed all guides and can download your certificate!")
+            if st.button("📜 Generate My Certificate", type="primary"):
+                cert_path = generate_certificate()
+                if cert_path and os.path.exists(cert_path):
+                    with open(cert_path, "rb") as f:
+                        st.download_button(
+                            label="📥 Download Certificate PDF",
+                            data=f,
+                            file_name="Prysmian_Induction_Certificate.pdf",
+                            mime="application/pdf"
+                        )
+                else:
+                    st.error("Failed to generate certificate.")
+        else:
+            st.info(cert_msg)
+    with c_cert2:
+        # Progress summary
+        user_status = get_user_completion_status()
+        categories = user_status.get("categories", [])
+        completed = sum(1 for c in categories if c["guide_complete"])
+        total = len(categories)
+        
+        st.markdown(f"""
+        <div style="text-align: center; padding: 20px; background: rgba(0,177,64,0.1); border-radius: 12px;">
+            <div style="font-size: 48px; font-weight: bold; color: #00B140;">{completed}/{total}</div>
+            <div style="font-size: 14px; color: #888;">Guides Completed</div>
+        </div>
+        """, unsafe_allow_html=True)
 
 def render_search_results(results):
     st.title(f"🔍 Search Results")
@@ -462,13 +545,22 @@ def render_category_page(category_key):
     cat_name = data["categories_list"].get(category_key, "Unknown Category")
     content = data.get(category_key, {"description": "", "steps": []})
     
+    # Track page view for analytics
+    track_page_view(category_key)
+    
     steps = content.get("steps", [])
     total_steps = len(steps)
     
-    # Calculate progress
+    # Load progress (try persistent first, then session)
+    if f"progress_{category_key}" not in st.session_state:
+        st.session_state[f"progress_{category_key}"] = load_user_progress(category_key)
+    
     completed_steps = st.session_state.get(f"progress_{category_key}", [])
     completed_count = len(completed_steps)
     progress_pct = int((completed_count / total_steps) * 100) if total_steps > 0 else 0
+    
+    # Load bookmarks
+    user_bookmarks = load_bookmarks()
     
     # --- BREADCRUMBS ---
     st.markdown(f"""
@@ -480,8 +572,28 @@ def render_category_page(category_key):
     # --- HEADER WITH TIME ESTIMATE ---
     # Time estimate: ~2 min per step as default
     estimated_time = content.get("estimated_time", total_steps * 2)
-    st.header(cat_name)
-    st.caption(f"⏱️ ~{estimated_time} minute{'s' if estimated_time != 1 else ''}")
+    
+    hc1, hc2 = st.columns([4, 1])
+    with hc1:
+        st.header(cat_name)
+        st.caption(f"⏱️ ~{estimated_time} minutes")
+    with hc2:
+        # Print button using JavaScript - must use components.html for onclick to work
+        st.components.v1.html("""
+        <button onclick="window.parent.print()" style="
+            background: linear-gradient(135deg, #00D2BE, #00B140);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            box-shadow: 0 4px 14px rgba(0, 177, 64, 0.3);
+            transition: all 0.2s ease;
+        " onmouseover="this.style.transform='translateY(-2px)'" 
+           onmouseout="this.style.transform='translateY(0)'">🖨️ Print Guide</button>
+        """, height=50)
     
     if content.get("description"):
         st.info(content.get("description", ""))
@@ -535,7 +647,7 @@ def render_category_page(category_key):
             sc1, sc2 = st.columns([1, 1])
             with sc1:
                 # MARK AS DONE BUTTON
-                btn_label = "✅ Completed" if is_completed else "⭕ Mark as Done"
+                btn_label = "Completed ✓" if is_completed else "Mark as Done"
                 if st.button(btn_label, key=f"done_{category_key}_{i}"):
                     current_prog = st.session_state.get(f"progress_{category_key}", [])
                     if step_id in current_prog:
@@ -543,11 +655,31 @@ def render_category_page(category_key):
                     else:
                         current_prog.append(step_id)
                     st.session_state[f"progress_{category_key}"] = current_prog
+                    save_user_progress(category_key, current_prog)  # Persist!
                     st.rerun()
             
             with sc2:
                  # Direct Link for sharing
                  st.caption(f"🔗 [Direct Link](?page={category_key}&step={i+1})")
+            
+            # --- STEP FEEDBACK & BOOKMARK ---
+            fc1, fc2, fc3 = st.columns([1, 1, 2])
+            with fc1:
+                if st.button("👍", key=f"fb_up_{category_key}_{i}", help="This step was helpful"):
+                    save_step_feedback(category_key, i, "helpful")
+                    st.toast("Thanks for your feedback!", icon="🎉")
+            with fc2:
+                if st.button("👎", key=f"fb_down_{category_key}_{i}", help="This step needs improvement"):
+                    save_step_feedback(category_key, i, "not_helpful")
+                    st.toast("Thanks! We'll improve this.", icon="🔧")
+            with fc3:
+                bookmark_key = f"{category_key}_step_{i}"
+                is_bookmarked = bookmark_key in user_bookmarks
+                bm_label = "⭐ Bookmarked" if is_bookmarked else "☆ Bookmark"
+                if st.button(bm_label, key=f"bm_{category_key}_{i}", help="Save this step for later"):
+                    save_bookmark(category_key, i, add=not is_bookmarked)
+                    st.toast("Bookmark updated!" if is_bookmarked else "Bookmarked!", icon="⭐")
+                    st.rerun()
         
         with c2:
             media_file = step.get('image')
@@ -574,11 +706,21 @@ def render_category_page(category_key):
                      if media_path.lower().endswith(('.mp4', '.mov')):
                          st.video(media_path)
                      else:
-                        # Native Streamlit Implementation with Zoom
+                        # 1. Print-only image (hidden on screen, visible in print)
+                        img_b64 = get_image_base64(media_path)
+                        if img_b64:
+                            st.markdown(f'''
+                            <img src="data:image/png;base64,{img_b64}" 
+                                 class="print-only-image" 
+                                 style="display: none; max-width: 100%; border-radius: 8px;">
+                            ''', unsafe_allow_html=True)
+                        
+                        # 2. Screen-only zoomable image (hidden in print)
                         render_zoomable_image(media_path, key=f"{category_key}_{i}")
     
     # --- CELEBRATION BANNER ---
     if completed_count == total_steps and total_steps > 0:
+        track_completion(category_key)  # Track for analytics
         st.balloons()
         st.markdown(f"""
         <div class="celebration-banner">
@@ -586,6 +728,56 @@ def render_category_page(category_key):
             <p>You have completed all {total_steps} steps in this guide!</p>
         </div>
         """, unsafe_allow_html=True)
+        
+        # --- QUIZ SECTION ---
+        quiz_questions = get_quiz(category_key)
+        quiz_result = get_quiz_result(category_key)
+        
+        if quiz_questions:
+            st.markdown("---")
+            st.subheader("🧠 Knowledge Check Quiz")
+            
+            if quiz_result and quiz_result.get("passed"):
+                st.success(f"✅ You passed this quiz! Score: {quiz_result['score']}/{quiz_result['total']}")
+            else:
+                st.info("Answer the questions below to test your knowledge.")
+                
+                # Quiz form
+                with st.form(f"quiz_form_{category_key}"):
+                    user_answers = {}
+                    
+                    for qi, qq in enumerate(quiz_questions):
+                        st.markdown(f"**Q{qi+1}: {qq.get('q', 'Question')}**")
+                        options = qq.get("answers", [])
+                        user_answers[qi] = st.radio(
+                            f"Select answer:",
+                            options,
+                            key=f"quiz_{category_key}_{qi}",
+                            label_visibility="collapsed"
+                        )
+                        st.markdown("")
+                    
+                    submitted = st.form_submit_button("📝 Submit Quiz", type="primary")
+                    
+                    if submitted:
+                        score = 0
+                        for qi, qq in enumerate(quiz_questions):
+                            correct_idx = qq.get("correct", 0)
+                            options = qq.get("answers", [])
+                            if user_answers.get(qi) == options[correct_idx]:
+                                score += 1
+                        
+                        total = len(quiz_questions)
+                        passed = score >= (total * 0.7)  # 70% to pass
+                        
+                        save_quiz_result(category_key, score, total, passed)
+                        
+                        if passed:
+                            st.success(f"🎉 Congratulations! You passed with {score}/{total}!")
+                            st.balloons()
+                        else:
+                            st.error(f"You scored {score}/{total}. You need 70% to pass. Try again!")
+                        st.rerun()
     
     # --- FEEDBACK SECTION ---
     st.divider()

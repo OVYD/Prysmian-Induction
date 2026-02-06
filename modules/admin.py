@@ -1,20 +1,28 @@
 import streamlit as st
 import os
-from modules.data_manager import load_data, save_data, log_event
+from modules.data_manager import (
+    load_data, save_data, log_event, get_analytics_summary, get_analytics_data, 
+    save_version_snapshot, get_version_history, restore_version, get_last_updated,
+    get_quiz, save_quiz, get_all_users_progress, get_user_completion_status
+)
 from modules.auth import hash_password
+from modules.pdf_export import get_pdf_download_link
 
 MEDIA_DIR = "images"
 
 def render_admin_panel():
     st.title("⚙️ Admin Dashboard")
     
-    tab_cats, tab_reorder, tab_create, tab_home, tab_users, tab_logs = st.tabs([
+    tab_cats, tab_reorder, tab_create, tab_home, tab_faq, tab_analytics, tab_feedback, tab_users, tab_logs = st.tabs([
         "📂 Manage Content", 
         "⇄ Reorder Menu",
         "➕ Create Category", 
-        "🏠 Home Page", 
+        "🏠 Home Page",
+        "❓ FAQ Manager",
+        "📈 Analytics",
+        "📊 Feedback",
         "👥 Manage Users", 
-        "📋 logs"
+        "📋 Logs"
     ])
     
     data = load_data()
@@ -87,9 +95,85 @@ def render_admin_panel():
             st.subheader("Intro / Description")
             new_desc = st.text_area("Category Description:", value=current_content.get("description", ""), height=70)
             if new_desc != current_content.get("description"):
+                save_version_snapshot(cat_key)  # Save version before change
                 if cat_key not in data: data[cat_key] = {"description": "", "steps": []}
                 data[cat_key]["description"] = new_desc
                 save_data(data)
+            
+            # --- VERSION HISTORY EXPANDER ---
+            version_history = get_version_history(cat_key)
+            last_updated = get_last_updated(cat_key)
+            
+            with st.expander(f"📜 Version History ({len(version_history)} versions)", expanded=False):
+                if last_updated:
+                    st.caption(f"**Last Updated:** {last_updated}")
+                
+                if not version_history:
+                    st.info("No version history yet. Changes will be tracked automatically.")
+                else:
+                    for ver in version_history[:5]:  # Show last 5
+                        v_col1, v_col2, v_col3 = st.columns([2, 2, 1])
+                        with v_col1:
+                            st.markdown(f"**v{ver['version']}** - {ver['step_count']} steps")
+                        with v_col2:
+                            st.caption(ver['timestamp'])
+                        with v_col3:
+                            if st.button("↩️", key=f"restore_{cat_key}_{ver['version']}", help="Restore this version"):
+                                if restore_version(cat_key, ver['version']):
+                                    st.success(f"Restored to v{ver['version']}!")
+                                    st.rerun()
+                                else:
+                                    st.error("Failed to restore.")
+            
+            # --- QUIZ EDITOR ---
+            st.markdown("---")
+            st.subheader("🧠 Quiz Questions")
+            st.caption("Add quiz questions to test users after completing this guide.")
+            
+            quiz_questions = get_quiz(cat_key)
+            
+            # Add new question
+            with st.container(border=True):
+                st.markdown("**➕ Add New Question**")
+                new_q = st.text_input("Question:", key=f"new_quiz_q_{cat_key}")
+                col_a1, col_a2 = st.columns(2)
+                with col_a1:
+                    new_a1 = st.text_input("Answer 1:", key=f"new_quiz_a1_{cat_key}")
+                    new_a2 = st.text_input("Answer 2:", key=f"new_quiz_a2_{cat_key}")
+                with col_a2:
+                    new_a3 = st.text_input("Answer 3:", key=f"new_quiz_a3_{cat_key}")
+                    new_a4 = st.text_input("Answer 4:", key=f"new_quiz_a4_{cat_key}")
+                correct_idx = st.radio("Correct Answer:", ["1", "2", "3", "4"], horizontal=True, key=f"new_quiz_correct_{cat_key}")
+                
+                if st.button("➕ Add Question", key=f"add_quiz_{cat_key}"):
+                    if new_q and new_a1 and new_a2:
+                        answers = [a for a in [new_a1, new_a2, new_a3, new_a4] if a]
+                        quiz_questions.append({
+                            "q": new_q,
+                            "answers": answers,
+                            "correct": int(correct_idx) - 1
+                        })
+                        save_quiz(cat_key, quiz_questions)
+                        st.success("Question added!")
+                        st.rerun()
+                    else:
+                        st.error("Fill in question and at least 2 answers.")
+            
+            # Existing questions
+            if quiz_questions:
+                st.markdown(f"**📝 Existing Questions ({len(quiz_questions)})**")
+                for qi, qq in enumerate(quiz_questions):
+                    with st.expander(f"Q{qi+1}: {qq.get('q', 'Question')[:40]}..."):
+                        st.write(f"**{qq.get('q')}**")
+                        for ai, ans in enumerate(qq.get("answers", [])):
+                            prefix = "✅ " if ai == qq.get("correct", 0) else ""
+                            st.write(f"{prefix}{ai+1}. {ans}")
+                        if st.button("🗑️ Delete", key=f"del_quiz_{cat_key}_{qi}"):
+                            quiz_questions.pop(qi)
+                            save_quiz(cat_key, quiz_questions)
+                            st.rerun()
+            else:
+                st.info("No quiz questions yet. Add some above!")
 
             st.markdown("---")
             
@@ -223,6 +307,7 @@ def render_admin_panel():
                          save_data(data)
                          st.rerun()
                     if col_del.button("🗑️", key=f"sdel_{cat_key}_{i}", type="primary"):
+                        save_version_snapshot(cat_key)  # Save version before delete
                         current_steps.pop(i)
                         data[cat_key]["steps"] = current_steps
                         save_data(data)
@@ -275,11 +360,352 @@ def render_admin_panel():
             save_data(data)
             st.success("Saved.")
 
-    # --- TAB: USERS ---
+    # --- TAB: FAQ MANAGER ---
+    with tab_faq:
+        st.header("❓ FAQ Manager")
+        st.caption("Add, edit, or remove frequently asked questions.")
+        
+        faqs = data.get("faq", [])
+        
+        # Add new FAQ
+        st.subheader("➕ Add New FAQ")
+        with st.container(border=True):
+            new_q = st.text_input("Question:", placeholder="How do I reset my password?")
+            new_a = st.text_area("Answer:", placeholder="To reset your password, go to...", height=100)
+            
+            if st.button("Add FAQ", type="primary"):
+                if new_q and new_a:
+                    faqs.append({"q": new_q, "a": new_a})
+                    data["faq"] = faqs
+                    save_data(data)
+                    st.success("FAQ added!")
+                    st.rerun()
+                else:
+                    st.error("Please fill in both question and answer.")
+        
+        st.divider()
+        
+        # Existing FAQs
+        st.subheader(f"📝 Existing FAQs ({len(faqs)})")
+        
+        for i, faq in enumerate(faqs):
+            with st.expander(f"Q: {faq.get('q', 'No question')[:50]}...", expanded=False):
+                edit_q = st.text_input("Question:", value=faq.get("q", ""), key=f"faq_q_{i}")
+                edit_a = st.text_area("Answer:", value=faq.get("a", ""), key=f"faq_a_{i}", height=100)
+                
+                col_save, col_up, col_down, col_del = st.columns([2, 1, 1, 1])
+                
+                # Save changes
+                if edit_q != faq.get("q") or edit_a != faq.get("a"):
+                    faqs[i]["q"] = edit_q
+                    faqs[i]["a"] = edit_a
+                    data["faq"] = faqs
+                    save_data(data)
+                
+                # Move up
+                if col_up.button("⬆️", key=f"faq_up_{i}") and i > 0:
+                    faqs[i], faqs[i-1] = faqs[i-1], faqs[i]
+                    data["faq"] = faqs
+                    save_data(data)
+                    st.rerun()
+                
+                # Move down
+                if col_down.button("⬇️", key=f"faq_down_{i}") and i < len(faqs)-1:
+                    faqs[i], faqs[i+1] = faqs[i+1], faqs[i]
+                    data["faq"] = faqs
+                    save_data(data)
+                    st.rerun()
+                
+                # Delete
+                if col_del.button("🗑️", key=f"faq_del_{i}", type="primary"):
+                    faqs.pop(i)
+                    data["faq"] = faqs
+                    save_data(data)
+                    st.rerun()
+
+    # --- TAB: ANALYTICS DASHBOARD ---
+    with tab_analytics:
+        st.header("📈 Usage Analytics")
+        st.caption("Track guide views, completions, and user engagement.")
+        
+        analytics = get_analytics_data()
+        summary = get_analytics_summary()
+        
+        if not analytics.get("page_views"):
+            st.info("No analytics data yet. Data will appear as users visit guides.")
+        else:
+            # Summary Metrics
+            total_views = sum(item["views"] for item in summary)
+            total_completions = sum(item["completions"] for item in summary)
+            avg_completion_rate = round(sum(item["completion_rate"] for item in summary) / len(summary), 1) if summary else 0
+            
+            m1, m2, m3, m4 = st.columns(4)
+            with m1:
+                st.metric("👁️ Total Views", total_views)
+            with m2:
+                st.metric("✅ Completions", total_completions)
+            with m3:
+                st.metric("📊 Avg Completion Rate", f"{avg_completion_rate}%")
+            with m4:
+                st.metric("📚 Active Guides", len([s for s in summary if s["views"] > 0]))
+            
+            st.divider()
+            
+            # Top Viewed Guides Chart
+            st.subheader("🏆 Top Viewed Guides")
+            
+            if summary:
+                # Create a simple bar chart using columns
+                for item in summary[:5]:  # Top 5
+                    col1, col2, col3 = st.columns([3, 2, 1])
+                    with col1:
+                        # Progress bar visualization
+                        max_views = max(s["views"] for s in summary) if summary else 1
+                        pct = int((item["views"] / max_views) * 100) if max_views > 0 else 0
+                        st.markdown(f"""
+                        <div style="background: #2D3748; border-radius: 4px; padding: 8px; margin: 4px 0;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                <span>{item["name"][:30]}</span>
+                                <span style="color: #00D2BE;">{item["views"]} views</span>
+                            </div>
+                            <div style="background: #1a1a2e; height: 8px; border-radius: 4px;">
+                                <div style="background: linear-gradient(90deg, #00D2BE, #00B140); width: {pct}%; height: 100%; border-radius: 4px;"></div>
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
+                    with col2:
+                        st.caption(f"Completions: {item['completions']}")
+                    with col3:
+                        rate_color = "#00B140" if item["completion_rate"] >= 50 else "#FFA500" if item["completion_rate"] >= 25 else "#FF4444"
+                        st.markdown(f"<span style='color: {rate_color};'>{item['completion_rate']}%</span>", unsafe_allow_html=True)
+            
+            st.divider()
+            
+            # Daily Trends (Last 7 Days)
+            st.subheader("📅 Last 7 Days Activity")
+            daily_views = analytics.get("daily_views", {})
+            
+            if daily_views:
+                import datetime
+                today = datetime.datetime.now()
+                last_7_days = [(today - datetime.timedelta(days=i)).strftime("%Y-%m-%d") for i in range(6, -1, -1)]
+                
+                for day in last_7_days:
+                    day_data = daily_views.get(day, {})
+                    total_day_views = sum(day_data.values())
+                    day_label = datetime.datetime.strptime(day, "%Y-%m-%d").strftime("%a %d/%m")
+                    
+                    st.markdown(f"**{day_label}**: {total_day_views} views")
+            else:
+                st.caption("No daily data available yet.")
+            
+            st.divider()
+            
+            # Export PDF Button
+            col_export, col_reset = st.columns([1, 1])
+            with col_export:
+                if st.button("📄 Export Report to PDF", type="primary"):
+                    pdf_path = get_pdf_download_link()
+                    if pdf_path and os.path.exists(pdf_path):
+                        with open(pdf_path, "rb") as f:
+                            st.download_button(
+                                label="📥 Download PDF Report",
+                                data=f,
+                                file_name="analytics_report.pdf",
+                                mime="application/pdf"
+                            )
+                    else:
+                        st.error("Failed to generate PDF.")
+            
+            with col_reset:
+                # Clear Analytics Button
+                if st.button("🗑️ Reset All Analytics", type="secondary"):
+                    data["analytics"] = {"page_views": {}, "completions": {}, "daily_views": {}}
+                    save_data(data)
+                    st.success("Analytics data cleared!")
+                    st.rerun()
+
+    # --- TAB: FEEDBACK STATS ---
+    with tab_feedback:
+        st.header("📊 Feedback Analytics")
+        st.caption("View user feedback statistics for each guide step.")
+        
+        step_feedback = data.get("step_feedback", {})
+        
+        if not step_feedback:
+            st.info("No feedback has been collected yet. Feedback will appear here as users rate steps.")
+        else:
+            # Calculate totals
+            total_helpful = sum(f.get("helpful", 0) for f in step_feedback.values())
+            total_not_helpful = sum(f.get("not_helpful", 0) for f in step_feedback.values())
+            total_votes = total_helpful + total_not_helpful
+            
+            # Summary metrics
+            m1, m2, m3, m4 = st.columns(4)
+            with m1:
+                st.metric("Total Votes", total_votes)
+            with m2:
+                st.metric("👍 Helpful", total_helpful)
+            with m3:
+                st.metric("👎 Not Helpful", total_not_helpful)
+            with m4:
+                satisfaction_rate = round((total_helpful / total_votes * 100) if total_votes > 0 else 0, 1)
+                st.metric("Satisfaction Rate", f"{satisfaction_rate}%")
+            
+            st.divider()
+            
+            # Filter by category
+            filter_cat = st.selectbox(
+                "Filter by Category:",
+                ["All Categories"] + list(categories.values()),
+                key="feedback_filter"
+            )
+            
+            st.subheader("📋 Detailed Feedback by Step")
+            
+            # Process and display feedback
+            for step_key, fb_data in sorted(step_feedback.items(), key=lambda x: x[1].get("not_helpful", 0), reverse=True):
+                # Parse step key: "category_step_index"
+                parts = step_key.split("_step_")
+                if len(parts) != 2:
+                    continue
+                    
+                cat_key, step_idx = parts[0], parts[1]
+                cat_name = categories.get(cat_key, cat_key)
+                
+                # Apply filter
+                if filter_cat != "All Categories" and cat_name != filter_cat:
+                    continue
+                
+                helpful = fb_data.get("helpful", 0)
+                not_helpful = fb_data.get("not_helpful", 0)
+                total = helpful + not_helpful
+                
+                if total == 0:
+                    continue
+                
+                # Get step title if available
+                try:
+                    step_data = data.get(cat_key, {}).get("steps", [])
+                    step_title = step_data[int(step_idx)].get("title", f"Step {int(step_idx) + 1}")
+                except:
+                    step_title = f"Step {int(step_idx) + 1}"
+                
+                # Display with color coding
+                ratio = helpful / total if total > 0 else 0
+                color = "#00B140" if ratio >= 0.7 else "#FFA500" if ratio >= 0.4 else "#FF4444"
+                
+                with st.container(border=True):
+                    c1, c2, c3 = st.columns([3, 1, 1])
+                    with c1:
+                        st.markdown(f"**{cat_name}** → {step_title}")
+                    with c2:
+                        st.markdown(f"👍 {helpful} &nbsp; 👎 {not_helpful}")
+                    with c3:
+                        st.markdown(f"<span style='color: {color}; font-weight: bold;'>{round(ratio * 100)}%</span>", unsafe_allow_html=True)
+            
+            st.divider()
+            
+            # Clear feedback option
+            if st.button("🗑️ Clear All Feedback Data", type="secondary"):
+                data["step_feedback"] = {}
+                save_data(data)
+                st.success("Feedback data cleared!")
+                st.rerun()
+
+    # --- TAB: USERS (User Progress Dashboard) ---
     with tab_users:
-        st.header("Admin Users")
-        nu_user = st.text_input("New Username")
-        nu_pass = st.text_input("New Password", type="password")
+        st.header("👥 User Progress Tracking")
+        st.caption("Monitor employee onboarding progress across all guides.")
+        
+        users_data = get_all_users_progress()
+        
+        if not users_data:
+            st.info("No registered users yet. Users will appear here once they provide their name/email.")
+        else:
+            # Summary metrics
+            m1, m2, m3, m4 = st.columns(4)
+            total_users = len(users_data)
+            completed_users = sum(1 for u in users_data if u["completion_pct"] == 100)
+            avg_progress = round(sum(u["completion_pct"] for u in users_data) / total_users) if total_users else 0
+            
+            with m1:
+                st.metric("👤 Total Users", total_users)
+            with m2:
+                st.metric("✅ Fully Completed", completed_users)
+            with m3:
+                st.metric("📊 Avg Progress", f"{avg_progress}%")
+            with m4:
+                st.metric("🧠 Quizzes Passed", sum(u["quizzes_passed"] for u in users_data))
+            
+            st.divider()
+            
+            # Search/Filter
+            search_user = st.text_input("🔍 Search by name or email:")
+            
+            # User table
+            st.subheader("📋 User Details")
+            
+            for user in users_data:
+                # Apply search filter
+                if search_user and search_user.lower() not in user["name"].lower() and search_user.lower() not in user["email"].lower():
+                    continue
+                
+                # Color based on progress
+                if user["completion_pct"] == 100:
+                    status_icon = "🏆"
+                    status_color = "#00B140"
+                elif user["completion_pct"] >= 50:
+                    status_icon = "📈"
+                    status_color = "#FFA500"
+                else:
+                    status_icon = "🚀"
+                    status_color = "#FF4444"
+                
+                with st.container(border=True):
+                    c1, c2, c3, c4 = st.columns([3, 2, 1, 1])
+                    with c1:
+                        st.markdown(f"**{status_icon} {user['name']}**")
+                        st.caption(user["email"])
+                    with c2:
+                        st.caption(f"Dept: {user['department'] or 'N/A'}")
+                        st.caption(f"Joined: {user['registered_at']}")
+                    with c3:
+                        st.markdown(f"""
+                        <div style='text-align: center;'>
+                            <div style='font-size: 24px; color: {status_color};'>{user['completion_pct']}%</div>
+                            <div style='font-size: 11px; color: #888;'>Progress</div>
+                        </div>
+                        """, unsafe_allow_html=True)
+                    with c4:
+                        st.markdown(f"""
+                        <div style='text-align: center;'>
+                            <div style='font-size: 24px;'>{user['guides_completed']}/{user['total_guides']}</div>
+                            <div style='font-size: 11px; color: #888;'>Guides</div>
+                        </div>
+                        """, unsafe_allow_html=True)
+                    
+                    # Expandable details
+                    with st.expander("View Details"):
+                        user_status = get_user_completion_status(user["user_id"])
+                        for cat in user_status.get("categories", []):
+                            prog_bar_color = "#00B140" if cat["guide_complete"] else "#00D2BE"
+                            quiz_status = "✅ Passed" if cat["quiz_passed"] else (f"❌ {cat['quiz_score']}/{cat['quiz_total']}" if cat["quiz_total"] > 0 else "⏳ Not taken")
+                            
+                            col_name, col_prog, col_quiz = st.columns([3, 2, 1])
+                            with col_name:
+                                st.write(cat["name"][:30])
+                            with col_prog:
+                                st.progress(cat["progress_pct"] / 100)
+                            with col_quiz:
+                                st.caption(quiz_status)
+        
+        st.divider()
+        
+        # Admin Users Section
+        st.subheader("🔐 Admin Users")
+        nu_user = st.text_input("New Admin Username")
+        nu_pass = st.text_input("New Admin Password", type="password")
         if st.button("Add Admin"):
             if not nu_user or not nu_pass:
                 st.error("Fill all fields.")
@@ -287,11 +713,10 @@ def render_admin_panel():
                 if "admins" not in data: data["admins"] = {}
                 data["admins"][nu_user] = hash_password(nu_pass)
                 save_data(data)
-                st.success("User added.")
+                st.success("Admin added.")
                 st.rerun()
         
-        st.divider()
-        st.write("Existing Admins:")
+        st.caption("Existing Admins:")
         for user in list(data.get("admins", {}).keys()):
             c1, c2 = st.columns([3, 1])
             c1.write(f"- {user}")

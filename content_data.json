@@ -130,7 +130,7 @@
         "text": "# Welcome to Prysmian!\n\n**Prysmian** is the world leader in the energy and telecom cable systems industry. With a strong presence in over 50 countries, we are the driving force behind the global energy transition and digital transformation.\n\n### Our Mission\nTo provide superior cable solutions based on state-of-the-art technology and consistent excellence in execution, ultimately **connecting the world**."
     },
     "software_center": {
-        "description": "**Software Center** is Microsoft's enterprise application portal, integrated through **System Center Configuration Manager (SCCM)**. It allows you to install approved software directly on your work computer without needing administrator rights or IT assistance.\n\n**Key Features:**\n\n🖥️ **Self-Service Installation**: Browse and install applications independently.\n\n⏱️ **Scheduled Updates**: Software updates are automatically managed by IT.\n\n✅ **Pre-Approved Apps**: All software in the catalog is security-vetted and license-compliant.\n\n📊 **Installation Status**: Track download and installation progress in real-time.\n\n**How to Access:**\n\n1. Open the **Start Menu**\n2. Search for **Software Center**\n3. Browse the **Applications** tab",
+        "description": "**Software Center** is Microsoft's enterprise application portal, integrated through **System Center Configuration Manager (SCCM)**. It allows you to install approved software directly on your work computer without needing administrator rights or IT assistance.\n\n**Key Features:**\n\n\ud83d\udda5\ufe0f **Self-Service Installation**: Browse and install applications independently.\n\n\u23f1\ufe0f **Scheduled Updates**: Software updates are automatically managed by IT.\n\n\u2705 **Pre-Approved Apps**: All software in the catalog is security-vetted and license-compliant.\n\n\ud83d\udcca **Installation Status**: Track download and installation progress in real-time.\n\n**How to Access:**\n\n1. Open the **Start Menu**\n2. Search for **Software Center**\n3. Browse the **Applications** tab",
         "estimated_time": 3,
         "steps": [
             {
@@ -142,15 +142,19 @@
         ]
     },
     "categories_list": {
-        "mfa": "🔐 1. MFA (Microsoft 2FA)",
-        "vpn": "🛡️ 2. VPN Config",
-        "outlook": "📧 3. Outlook & Email",
-        "mobile": "📱 4. Mobile APN",
-        "software_center": "💿 5. Software Center",
-        "ticketing": "🛠️ Service Portal (Ticketing System)",
-        "other": "📚 6. Other Tutorials"
+        "mfa": "\ud83d\udd10 1. MFA (Microsoft 2FA)",
+        "vpn": "\ud83d\udee1\ufe0f 2. VPN Config",
+        "outlook": "\ud83d\udce7 3. Outlook & Email",
+        "mobile": "\ud83d\udcf1 4. Mobile APN",
+        "software_center": "\ud83d\udcbf 5. Software Center",
+        "ticketing": "\ud83d\udee0\ufe0f Service Portal (Ticketing System)",
+        "other": "\ud83d\udcda 6. Other Tutorials"
     },
     "system_logs": [
+        "[2026-02-06 17:32:31] [INFO] Admin login: admin",
+        "[2026-02-06 17:05:10] [INFO] Admin login: admin",
+        "[2026-02-06 15:29:25] [INFO] Admin login: admin",
+        "[2026-02-06 15:23:36] [INFO] Admin login: admin",
         "[2026-02-06 09:39:12] [INFO] Admin login: admin",
         "[2026-01-27 19:39:28] [INFO] Admin login: admin",
         "[2026-01-27 16:53:25] [INFO] Admin login: admin",
@@ -169,7 +173,7 @@
     ],
     "admins": {},
     "ticketing": {
-        "description": "The Service Portal is your centralized hub for all IT support requests and service management. It serves as the primary interface between employees and the IT Helpdesk, ensuring that every issue is tracked, prioritized, and resolved efficiently.\n\nKey Features:\n\n🎫 Submit Tickets: Report technical issues (hardware, software, network) or request new IT services directly.\n\n📂 Knowledge Base: Access a library of self-help articles, FAQs, and troubleshooting guides to resolve common problems instantly.\n\n📊 Track Status: Monitor the real-time progress of your open tickets and view historical requests.\n\n✅ Approvals: Managers can review and approve access requests or software installations with a single click.\n\nHow to Access:\n\nUse the \"Open TickIT\" button in the browser extension or navigate to the internal portal URL to get started - https://prysmiansd.service-now.com/sp .\n\nTo view ticket status - https://prysmiansd.service-now.com/sp?id=tickets ",
+        "description": "The Service Portal is your centralized hub for all IT support requests and service management. It serves as the primary interface between employees and the IT Helpdesk, ensuring that every issue is tracked, prioritized, and resolved efficiently.\n\nKey Features:\n\n\ud83c\udfab Submit Tickets: Report technical issues (hardware, software, network) or request new IT services directly.\n\n\ud83d\udcc2 Knowledge Base: Access a library of self-help articles, FAQs, and troubleshooting guides to resolve common problems instantly.\n\n\ud83d\udcca Track Status: Monitor the real-time progress of your open tickets and view historical requests.\n\n\u2705 Approvals: Managers can review and approve access requests or software installations with a single click.\n\nHow to Access:\n\nUse the \"Open TickIT\" button in the browser extension or navigate to the internal portal URL to get started - https://prysmiansd.service-now.com/sp .\n\nTo view ticket status - https://prysmiansd.service-now.com/sp?id=tickets ",
         "steps": [
             {
                 "title": "To view ticket status - https://prysmiansd.service-now.com/sp?id=tickets ",
@@ -217,5 +221,85 @@
     "feedback_stats": {
         "helpful": 0,
         "not_helpful": 0
+    },
+    "bookmarks": {
+        "50538ede": [],
+        "e439491e": [],
+        "059ea170": [],
+        "1ff56e89": [
+            "mfa_step_0"
+        ]
+    },
+    "step_feedback": {},
+    "analytics": {
+        "page_views": {
+            "outlook": {
+                "views": 3,
+                "last_viewed": "2026-02-06 23:25"
+            },
+            "mfa": {
+                "views": 9,
+                "last_viewed": "2026-02-06 23:02"
+            },
+            "vpn": {
+                "views": 2,
+                "last_viewed": "2026-02-06 17:24"
+            },
+            "mobile": {
+                "views": 3,
+                "last_viewed": "2026-02-06 23:28"
+            },
+            "software_center": {
+                "views": 1,
+                "last_viewed": "2026-02-06 17:31"
+            },
+            "ticketing": {
+                "views": 1,
+                "last_viewed": "2026-02-06 17:31"
+            }
+        },
+        "completions": {
+            "mfa": 1
+        },
+        "daily_views": {
+            "2026-02-06": {
+                "outlook": 3,
+                "mfa": 9,
+                "vpn": 2,
+                "mobile": 3,
+                "software_center": 1,
+                "ticketing": 1
+            }
+        }
+    },
+    "user_progress": {
+        "059ea170": {
+            "mfa": [
+                "step-1"
+            ]
+        },
+        "0f65a0fb": {
+            "mfa": [
+                "step-1"
+            ]
+        },
+        "2b7451ac": {
+            "mfa": [
+                "step-3",
+                "step-4"
+            ]
+        },
+        "1ff56e89": {
+            "mfa": []
+        }
+    },
+    "user_profiles": {
+        "beb5bb40": {
+            "name": "OVY",
+            "email": "test1",
+            "department": "NOC",
+            "registered_at": "2026-02-06 22:59",
+            "user_id": "beb5bb40"
+        }
     }
 }
