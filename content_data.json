@@ -1,0 +1,274 @@
+{
+    "mfa": {
+        "description": "**Two-Factor Authentication (2FA)** is now mandatory across our organization. This security measure is required for accessing your Microsoft account, logging into partner platforms via **Single Sign-On (SSO)**, and for performing password resets.\n\n**Two-Factor Authentication (2FA)** is enforced company-wide to protect your identity and data. Multi-factor verification is required for the following actions:\n\nAccessing your corporate **Microsoft account**.\n\nAuthenticating via **Single Sign-On (SSO)** with external partners.\n\nInitiating self-service password changes.",
+        "steps": [
+            {
+                "image": "3.png",
+                "text": "\n\nPlease navigate to **https://myaccount.microsoft.com/** and let's begin to secure your account."
+            },
+            {
+                "image": "2.png",
+                "text": "\n\nPlease navigate to **https://myaccount.microsoft.com/** and let's begin to secure your account."
+            },
+            {
+                "image": "1.png",
+                "text": "This image illustrates the verification request displayed on your device when authenticating with your Prysmian credentials."
+            },
+            {
+                "image": "4.png",
+                "text": "While **Microsoft Authenticator** is mandatory, adding a secondary method **(phone number or personal email)** is highly advised to prevent accidental lockouts.\n\nOnce configured, you are fully set to access the **Prysmian PULSE environment**."
+            }
+        ]
+    },
+    "vpn": {
+        "description": "Think of FortiClient VPN as a secure digital bridge between your computer and the office. Even if you are working from home or a coffee shop, turning this app on connects you directly to the company network. It allows you to access internal files, printers, and software exactly as if you were sitting at your desk, while keeping the connection safe from outsiders.\n\nLet's get started!",
+        "steps": [
+            {
+                "image": "vpn 1.png",
+                "text": "Please check that your username and password are correctly written. To prevent issues when you change your password, please uncheck the \"Save Password\" and \"Auto Connect\" boxes."
+            },
+            {
+                "image": "VPN 2.png",
+                "text": "Before pressing the \"Connect\" button, please ensure that the correct \"Client Certificate\" is selected.\n\nThe correct client certificate should be \"Your Name [username] / ModernSubCAXX\" - where \"XX\" cand be 01, 02 or 03. In some cases it can be the email address and \"ModernSubCAXX\"\n\nThen press \"Connect\"."
+            },
+            {
+                "image": "VPN 5.png",
+                "text": "An example on how the FortiClient VPN looks like when the connection is successfully."
+            },
+            {
+                "image": "VPN 4.png",
+                "text": "Troubleshooting in case the FortiClient VPN is not configured: \n\nConnection Name - Pulse-VPN-ALL\"\n\nRemote Gateway - https://geo.remote.prysmiangroup.com:443/pulse\n\nCustomize port checked and the port is 443\n\nUsername - your AD username (abcdefg00x)",
+                "title": "Troubleshooting "
+            },
+            {
+                "image": "VPN 6.png",
+                "text": "Troubleshooting in case the EMS server is not configured\n\nYou will need to enter \"fcmanager.prysmian.com:8013\" and check if the VPN client can connect to the EMS licensing server.\n\nIf this is unsuccessful, please contact Service Desk department, in order to collect more information and assist you in solving the issue.\n",
+                "title": "Troubleshooting"
+            }
+        ]
+    },
+    "outlook": {
+        "description": "Think of **Outlook** as your daily command center. It is much more than just an email inbox. It is the central hub where you will manage your calendar, schedule meetings, and store your contacts. We use it to stay organized, coordinate with the team, and ensure everyone is on the same page regarding deadlines and events. \n\nCombined with **Microsoft Copilot**, it is a game-changer that turns brief notes into polished emails and summarizes complex conversations instantly to save you time",
+        "steps": [
+            {
+                "image": "webmail.png",
+                "title": "WebMail",
+                "video_url": "",
+                "text": "Access your work email securely from any device using Outlook Webmail. Simply log in with your Prysmian credentials to stay connected on personal computers or smartphones when the standard Outlook app is not an option.\n\nAccess it at: https://outlook.office365.com/mail/"
+            },
+            {
+                "image": "Outlook 1.png",
+                "title": "Outlook ",
+                "video_url": "",
+                "text": "1. Initial Launch\n\nOpen Outlook from the Start Menu or your Taskbar.\n\nWait briefly: You will see a \"Searching for accounts\" or \"Loading Profile\" status. Since your credentials are integrated with your Windows login, Outlook will configure your mailbox automatically without prompting for a password.\n\nOnce the main inbox appears, your email is ready to use."
+            },
+            {
+                "image": "Outlook signature.png",
+                "title": "Outlook Signature",
+                "video_url": "",
+                "text": "2. Set Up Your Email Signature\n\nGo to File > Options.\n\nSelect Mail from the left menu.\n\nClick on Signatures...\n\nClick New, name your signature (e.g., \"Standard\"), and paste your contact details/company footer in the text box.\n\nImportant: Under \"Choose default signature,\" select your new signature for both \"New messages\" and \"Replies/forwards\" to ensure it appears automatically."
+            },
+            {
+                "image": "Outlook Reding Pane.png",
+                "title": "Reading Pane",
+                "video_url": "",
+                "text": "3. Adjust Your View (Reading Pane)\n\nClick the View tab at the top ribbon.\n\nClick Reading Pane to choose your preference:\n\nRight: Displays the email content to the right of your list (standard widescreen setup).\n\nBottom: Displays content below the list.\n\nOff: Displays only the list of emails."
+            },
+            {
+                "image": "Outlook Work hours.png",
+                "title": "Set Work Hours (Calendar)",
+                "video_url": "",
+                "text": "4. Set Work Hours (Calendar)\n\nGo to File > Options > Calendar.\n\nUnder \"Work time,\" set your Start time and End time and check the boxes for your working days (e.g., Mon-Fri).\n\nThis ensures that when colleagues schedule meetings with you, they can see when you are officially available."
+            },
+            {
+                "image": "Automatic Replies.png",
+                "title": "Automatic Replies (Out of Office)",
+                "video_url": "",
+                "text": "5. Automatic Replies (Out of Office)\n\nNote: Set this only when you are away.\n\nGo to File > Automatic Replies.\n\nSelect Send automatic replies and define the date range and message for times you are unavailable."
+            },
+            {
+                "image": "Outlook Add-ins.png",
+                "title": "Manage Add-ins (Enable/Disable)",
+                "video_url": "",
+                "text": "6. Manage Add-ins (Enable/Disable)\nOccasionally, add-ins such as Microsoft Teams may be automatically disabled and vanish from the meeting creation menu. If you encounter this issue, please follow the steps below to re-enable the add-in:\n\nAccess the Menu: Go to File > Options > Add-ins.\n\nManage COM Add-ins: At the bottom of the window, ensure the \"Manage\" dropdown is set to COM Add-ins and click Go...\n\nEnable/Disable:\n\nTo Enable: Check the box next to the add-in you want to use.\n\nTo Disable: Uncheck the box next to the add-in you want to turn off.\n\nSave: Click OK to apply the changes.\n\nIf the Add-in is disabled an cannot be enabled, even if you check the box in Manage COM Add-ins, go to Disabled Items, under COM Add-ins and enable the add-in from there."
+            }
+        ]
+    },
+    "mobile": {
+        "description": "# What is an APN?\n\nAn **APN (Access Point Name)** acts as a digital gateway between your mobile carrier's cellular network (GSM, 4G, 5G) and the public internet.\n\nThink of it as a \"virtual bridge\" or an address that tells your phone exactly how to connect to your provider's data services. It determines the correct IP address, security settings, and network path needed for connectivity.\n\nKey functions:\n\nEstablishes Connection: It allows your device to browse the web using mobile data.\n\nEnables MMS: It is often required to send multimedia messages (photos/videos).\n\nAutomatic Configuration: While most phones download these settings automatically when you insert a SIM card, they sometimes require manual setup to work correctly.\n\nIn short: Without the correct APN settings, your phone connects to the cellular tower for calls, but cannot access the internet.\n\nThe **APN** in **Prysmian** is: **netmon.vodafone.it**",
+        "steps": [
+            {
+                "image": "Android APN settings.png",
+                "text": "Go to Settings > Connections > Mobile Networks.\n\nTap Access Point Names.\n\nTap Add (or the + icon).\n\nEnter the following details:\n\nName: Vodafone Netmon\n\nAPN: netmon.vodafone.it\n\nTap the Menu (three dots) and select Save.\n\nSelect the radio button next to the new APN to activate it.",
+                "title": "Android APN Setup",
+                "video_url": "https://prysmiangroup-my.sharepoint.com/:v:/r/personal/arrigo_fattiboni_prysmian_com/Documents/Stream%20Migrated%20Videos/APNandroid-20220218_052635.mp4?csf=1&web=1&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D&e=moyLK7",
+                "icon": "android logo mic.png"
+            },
+            {
+                "image": "Apple IoS APN settings.png",
+                "text": "Go to Settings.\n\nTap Cellular (or Mobile Data).\n\nTap Cellular Data Network (or Mobile Data Network).\n\nUnder the Cellular Data section, enter the following:\n\nAPN: netmon.vodafone.it\n\nUsername: (Leave blank)\n\nPassword: (Leave blank)\n\nPersonal Hotspot: netmon.vodafone.it\n\nTap the < Back arrow to automatically save the settings.",
+                "title": "IoS/iPhone APN Setup",
+                "video_url": "https://prysmiangroup-my.sharepoint.com/:v:/r/personal/arrigo_fattiboni_prysmian_com/Documents/Stream%20Migrated%20Videos/APNiphone-20220218_052633.mp4?csf=1&web=1&e=bgyE6X&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D",
+                "icon": "IoS logo.jpg"
+            }
+        ]
+    },
+    "other": {
+        "description": "One Drive Tutorial",
+        "steps": [
+            {
+                "image": "OneDrive configuration video.mp4",
+                "title": "One Drive Video Tutorial",
+                "video_url": "",
+                "icon": "",
+                "text": ""
+            }
+        ]
+    },
+    "home": {
+        "logo": "Prysmian logo positive transparent bckgr.png",
+        "text": "# Welcome to Prysmian!\n\n**Prysmian** is the world leader in the energy and telecom cable systems industry. With a strong presence in over 50 countries, we are the driving force behind the global energy transition and digital transformation.\n\n### Our Mission\nTo provide superior cable solutions based on state-of-the-art technology and consistent excellence in execution, ultimately **connecting the world**."
+    },
+    "software_center": {
+        "description": "",
+        "steps": []
+    },
+    "categories_list": {
+        "mfa": "\ud83d\udd10 1. MFA (Microsoft 2FA)",
+        "vpn": "\ud83d\udee1\ufe0f 2. VPN Config",
+        "outlook": "\ud83d\udce7 3. Outlook & Email",
+        "mobile": "\ud83d\udcf1 4. Mobile APN",
+        "software_center": "\ud83d\udcbf 5. Software Center",
+        "ticketing": "\ud83d\udee0\ufe0f Service Portal (Ticketing System)",
+        "other": "\ud83d\udcda 6. Other Tutorials"
+    },
+    "system_logs": [
+        "[2026-02-06 09:39:12] [INFO] Admin login: admin",
+        "[2026-01-27 19:39:28] [INFO] Admin login: admin",
+        "[2026-01-27 16:53:25] [INFO] Admin login: admin",
+        "[2026-01-27 16:52:28] [INFO] Admin login: admin",
+        "[2026-01-27 16:49:48] [INFO] Admin login: admin",
+        "[2026-01-27 16:47:46] [INFO] Admin login: admin",
+        "[2026-01-27 15:18:04] [INFO] Admin login: admin",
+        "[2026-01-27 13:33:12] [INFO] Added custom step to ticketing",
+        "[2026-01-27 13:31:03] [INFO] Deleted step in ticketing",
+        "[2026-01-27 13:21:12] [INFO] Admin login: admin",
+        "[2026-01-27 13:13:06] [INFO] Added URL step to ticketing",
+        "[2026-01-27 13:09:46] [INFO] Admin login: admin",
+        "[2026-01-26 15:02:22] [INFO] Admin login: admin",
+        "[2025-12-12 09:52:49] [INFO] Added files to other",
+        "[2025-12-12 09:52:07] [INFO] Admin login: admin",
+        "[2025-12-09 16:52:14] [WARNING] Deleted CATEGORY Enrollment of New Device",
+        "[2025-12-09 16:40:20] [INFO] Admin login: admin",
+        "[2025-12-09 09:25:11] [INFO] Admin login: admin",
+        "[2025-12-08 15:03:55] [INFO] Admin login: admin",
+        "[2025-12-08 10:43:48] [INFO] Admin login: admin",
+        "[2025-12-08 10:32:27] [INFO] Admin login: admin",
+        "[2025-12-08 10:00:24] [INFO] Admin login: admin",
+        "[2025-12-05 15:33:34] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:34] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:34] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:33] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:33] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:33] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:33] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:32] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:32] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:32] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:32] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:31] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:31] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:31] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:31] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:30] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:30] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:30] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:30] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:29] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:29] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:29] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:29] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:28] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:28] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:28] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:28] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:27] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:27] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:27] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:27] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:26] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:26] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:26] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:26] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:25] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:25] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:25] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:25] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:24] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:24] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:24] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:24] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:23] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:23] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:23] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:23] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:22] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:22] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:22] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:22] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:21] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:21] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:21] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:21] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:20] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:20] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:20] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:20] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:19] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:19] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:19] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:19] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:18] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:18] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:18] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:18] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:18] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:17] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:17] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:17] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:17] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:16] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:16] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:16] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:16] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:15] [INFO] Replaced media in mobile step 1",
+        "[2025-12-05 15:33:15] [INFO] Replaced media in mobile step 1"
+    ],
+    "admins": {},
+    "ticketing": {
+        "description": "The Service Portal is your centralized hub for all IT support requests and service management. It serves as the primary interface between employees and the IT Helpdesk, ensuring that every issue is tracked, prioritized, and resolved efficiently.\n\nKey Features:\n\n\ud83c\udfab Submit Tickets: Report technical issues (hardware, software, network) or request new IT services directly.\n\n\ud83d\udcc2 Knowledge Base: Access a library of self-help articles, FAQs, and troubleshooting guides to resolve common problems instantly.\n\n\ud83d\udcca Track Status: Monitor the real-time progress of your open tickets and view historical requests.\n\n\u2705 Approvals: Managers can review and approve access requests or software installations with a single click.\n\nHow to Access:\n\nUse the \"Open TickIT\" button in the browser extension or navigate to the internal portal URL to get started - https://prysmiansd.service-now.com/sp .\n\nTo view ticket status - https://prysmiansd.service-now.com/sp?id=tickets ",
+        "steps": [
+            {
+                "title": "To view ticket status - https://prysmiansd.service-now.com/sp?id=tickets ",
+                "text": "To view ticket status - https://prysmiansd.service-now.com/sp?id=tickets ",
+                "icon": "",
+                "image": "",
+                "video_url": ""
+            }
+        ]
+    },
+    "faq": [
+        {
+            "q": "I cannot login to Outlook.",
+            "a": "Please ensure you have reset your initial password on a Prysmian device first."
+        },
+        {
+            "q": "VPN says 'Gateway Unreachable'.",
+            "a": "Check your internet connection and try switching from WiFi to Mobile Hotspot to test."
+        }
+    ],
+    "feedback_stats": {
+        "helpful": 0,
+        "not_helpful": 0
+    }
+}

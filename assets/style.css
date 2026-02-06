@@ -1,0 +1,516 @@
+/* Global Styles for Prysmian Theme (New Identity) */
+/* Fonts are handled by structural_css in ui_components.py */
+
+/* --- COLOR VARIABLES --- */
+/* Primary Background: #1C2434 (Dark Blue/Ebony Clay variant from new brand) */
+/* Sidebar Background: #141A26 (Darker shade) */
+/* Brand Gradient: Linear Gradient from #00D2BE (Cyan) to #00B140 (Green) */
+/* Text White: #FFFFFF */
+
+/* MAIN APP CONTAINER */
+.stApp,
+div[data-testid="stAppViewContainer"] {
+    background-color: #1C2434 !important;
+    background: linear-gradient(180deg, #1C2434 0%, #111621 100%) !important;
+    color: #FFFFFF;
+}
+
+/* SIDEBAR */
+section[data-testid="stSidebar"] {
+    background-color: #141A26;
+    border-right: 1px solid rgba(0, 210, 190, 0.1);
+    /* Subtle Cyan border */
+}
+
+/* Sidebar Text Elements */
+section[data-testid="stSidebar"] p,
+section[data-testid="stSidebar"] span,
+section[data-testid="stSidebar"] div[data-testid="stMarkdownContainer"] p,
+section[data-testid="stSidebar"] label {
+    color: #E2E8F0 !important;
+}
+
+/* WIDGET LABELS & INPUTS */
+.stTextInput label,
+.stSelectbox label,
+.stTextArea label,
+.stNumberInput label,
+.stFileUploader label,
+div[data-testid="stWidgetLabel"] p {
+    color: #FFFFFF !important;
+    font-weight: 500;
+}
+
+/* INPUT FIELDS - Modern Glassy/Dark Look */
+.stTextInput>div>div,
+.stTextArea>div>div,
+.stSelectbox>div>div,
+.stNumberInput>div>div {
+    background-color: rgba(0, 0, 0, 0.3) !important;
+    color: #FFFFFF !important;
+    border: 1px solid #2D3748 !important;
+    /* Gray-700 */
+    border-radius: 8px !important;
+}
+
+.stTextInput input,
+.stTextArea textarea,
+.stSelectbox div[data-testid="stMarkdownContainer"] {
+    color: #FFFFFF !important;
+}
+
+/* Focus State fo Inputs */
+.stTextInput>div>div:focus-within,
+.stTextArea>div>div:focus-within {
+    border-color: #00D2BE !important;
+    /* Cyan Focus */
+    box-shadow: 0 0 0 1px #00D2BE !important;
+}
+
+div[data-testid="stSidebarNav"] {
+    padding-top: 20px;
+}
+
+/* CUSTOM SEARCH BOX */
+.search-box-container {
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* BUTTONS */
+.stButton>button {
+    border-radius: 8px;
+    font-weight: 600;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+/* Primary Button - Gradient */
+button[kind="primary"] {
+    background: linear-gradient(90deg, #00D2BE 0%, #00B140 100%) !important;
+    /* Cyan to Green */
+    color: white !important;
+    border: none !important;
+    box-shadow: 0 4px 14px 0 rgba(0, 177, 64, 0.3);
+}
+
+button[kind="primary"]:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(0, 210, 190, 0.3);
+}
+
+/* Secondary Buttons */
+button[kind="secondary"] {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    color: white !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+button[kind="secondary"]:hover {
+    background-color: rgba(255, 255, 255, 0.12) !important;
+    border-color: #00D2BE !important;
+}
+
+/* HEADERS & LINKS */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: #FFFFFF !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.5px;
+}
+
+h1 {
+    /* Gradient Text for Main Titles */
+    background: linear-gradient(90deg, #FFFFFF, #00D2BE);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 20px !important;
+}
+
+a {
+    color: #00D2BE !important;
+}
+
+/* STEP CONTAINER (Premium Card) */
+.step-container {
+    background-color: rgba(28, 36, 52, 0.9);
+    /* #1C2434 opacity */
+    padding: 24px;
+    border-radius: 16px;
+    margin-bottom: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(8px);
+}
+
+.step-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 12px;
+}
+
+.step-number {
+    /* Gradient Circle */
+    background: linear-gradient(135deg, #00D2BE 0%, #00B140 100%);
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-right: 15px;
+    font-size: 16px;
+    box-shadow: 0 4px 12px rgba(0, 210, 190, 0.3);
+}
+
+.step-header h3 {
+    margin: 0 !important;
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+    font-size: 1.25rem;
+}
+
+/* FOOTER */
+.sidebar-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 260px;
+    padding: 20px;
+    text-align: center;
+    font-size: 11px;
+    color: #94a3b8;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background: #141A26;
+    z-index: 100;
+}
+
+/* VIDEO/IMAGE CONTAINERS */
+.stVideo,
+.stImage {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* SCROLLBAR */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #111621;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #2D3748;
+    border-radius: 5px;
+    border: 2px solid #111621;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #00D2BE;
+}
+
+/* --- NEW FEATURES CSS --- */
+
+/* 1. HOME QUICK ACTIONS (Cards) */
+.home-card {
+    background: linear-gradient(145deg, rgba(28, 36, 52, 0.9) 0%, rgba(20, 26, 38, 0.9) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    height: 100%;
+}
+
+.home-card:hover {
+    transform: translateY(-5px);
+    border-color: #00D2BE;
+    box-shadow: 0 10px 20px rgba(0, 210, 190, 0.15);
+}
+
+.home-card h3 {
+    margin-top: 10px !important;
+    font-size: 1.1rem;
+}
+
+.home-card p {
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+/* 2. PROGRESS TRACKING */
+.step-container.completed {
+    border-color: #00B140;
+    /* Green border */
+    background: rgba(0, 177, 64, 0.05);
+    /* Very subtle green tint */
+}
+
+.step-container.completed .step-number {
+    background: #00B140;
+    /* Solid Green */
+    box-shadow: 0 0 10px rgba(0, 177, 64, 0.4);
+}
+
+.step-container.completed .step-header h3::after {
+    content: " ✓ Completed";
+    font-size: 0.8rem;
+    color: #00B140;
+    margin-left: 10px;
+    opacity: 0.8;
+}
+
+/* 3. FAQ ACCORDION STYLING */
+/* Streamlit text in expander */
+.streamlit-expanderHeader {
+    background-color: rgba(255, 255, 255, 0.02) !important;
+    border-radius: 8px !important;
+}
+
+/* --- LIGHTBOX (IMAGE ZOOM) --- */
+.lightbox {
+    display: none;
+    /* Hidden by default */
+    position: fixed;
+    z-index: 1000000 !important;
+    /* Above everything including Streamlit header */
+    padding-top: 20px;
+    left: 0;
+    top: 0;
+    width: 100vw !important;
+    height: 100vh !important;
+    overflow: hidden;
+    background-color: rgba(0, 0, 0, 0.95) !important;
+    backdrop-filter: blur(5px);
+}
+
+.lightbox-content {
+    margin: auto;
+    display: block;
+    max-width: 95vw !important;
+    max-height: 95vh !important;
+    object-fit: contain;
+    border-radius: 4px;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+    animation-name: zoom;
+    animation-duration: 0.3s;
+}
+
+@keyframes zoom {
+    from {
+        transform: scale(0.8);
+        opacity: 0
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1
+    }
+}
+
+.close-btn {
+    position: absolute;
+    top: 15px;
+    right: 35px;
+    color: #fff;
+    font-size: 50px;
+    font-weight: bold;
+    transition: 0.3s;
+    cursor: pointer;
+    z-index: 1000001;
+    text-shadow: 0 0 10px #000;
+}
+
+.close-btn:hover,
+.close-btn:focus {
+    color: #00D2BE;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Thumbnail Style for Grid */
+.step-image {
+    cursor: zoom-in;
+    border-radius: 8px;
+    width: 100%;
+    transition: transform 0.2s;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.step-image:hover {
+    transform: scale(1.02);
+    border-color: #00D2BE;
+}
+
+/* ================================================
+   UX ENHANCEMENTS - New Features
+   ================================================ */
+
+/* 1. BREADCRUMBS */
+.breadcrumbs {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    margin-bottom: 12px;
+    padding: 8px 0;
+}
+
+.breadcrumbs a {
+    color: #00D2BE !important;
+    text-decoration: none;
+}
+
+.breadcrumbs a:hover {
+    text-decoration: underline;
+}
+
+.breadcrumbs .current {
+    color: #FFFFFF;
+    font-weight: 500;
+}
+
+/* 2. PROGRESS BAR */
+.progress-container {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin: 16px 0 24px 0;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+    color: #E2E8F0;
+}
+
+.progress-pct {
+    font-weight: 700;
+    color: #00D2BE;
+}
+
+.progress-bar-bg {
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00D2BE, #00B140);
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+/* 3. FLOATING HELP BUTTON */
+.help-button-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 9999;
+}
+
+.help-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #00D2BE, #00B140);
+    color: white;
+    padding: 14px 20px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    box-shadow: 0 4px 20px rgba(0, 177, 64, 0.4);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.help-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 25px rgba(0, 210, 190, 0.5);
+}
+
+/* 4. COMPLETION CELEBRATION */
+.celebration-banner {
+    background: linear-gradient(135deg, rgba(0, 177, 64, 0.15), rgba(0, 210, 190, 0.1));
+    border: 1px solid #00B140;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    margin: 24px 0;
+    animation: celebrate 0.5s ease;
+}
+
+.celebration-banner h3 {
+    color: #00B140 !important;
+    margin-bottom: 8px !important;
+}
+
+@keyframes celebrate {
+    0% {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+
+    50% {
+        transform: scale(1.02);
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* 5. RESPONSIVE DESIGN */
+@media (max-width: 768px) {
+    .step-container {
+        padding: 16px;
+        margin-bottom: 16px;
+    }
+
+    .step-header h3 {
+        font-size: 1rem;
+    }
+
+    .home-card {
+        padding: 16px;
+    }
+
+    .breadcrumbs {
+        font-size: 0.75rem;
+    }
+
+    .help-button {
+        padding: 12px 16px;
+        font-size: 0.85rem;
+    }
+
+    /* Larger touch targets */
+    .stButton>button {
+        min-height: 44px;
+        padding: 12px 20px;
+    }
+}
