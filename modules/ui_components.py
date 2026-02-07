@@ -185,35 +185,61 @@ def render_sidebar():
     st.sidebar.markdown("### Induction Portal")
     
     # --- MOBILE: Auto-close sidebar on navigation ---
-    # This JavaScript closes the sidebar when user clicks a radio button on mobile
-    st.sidebar.markdown("""
+    # Inject JavaScript that actually runs using components.html
+    import streamlit.components.v1 as components
+    
+    # This creates an invisible iframe that runs our script
+    components.html("""
         <script>
-        (function() {
-            // Only run on mobile
-            if (window.innerWidth <= 768) {
-                // Watch for clicks on radio buttons in sidebar
-                document.addEventListener('click', function(e) {
-                    const radioLabel = e.target.closest('label[data-baseweb="radio"]');
-                    const navButton = e.target.closest('button');
-                    
-                    if (radioLabel || (navButton && navButton.closest('section[data-testid="stSidebar"]'))) {
-                        // Delay to let Streamlit process the click
-                        setTimeout(function() {
-                            const sidebar = document.querySelector('section[data-testid="stSidebar"]');
-                            const closeBtn = document.querySelector('button[data-testid="stSidebar"] button, button[aria-label="Close sidebar"]');
-                            
-                            // Try to find and click the collapse button
-                            const collapseBtn = document.querySelector('button[data-testid="baseButton-headerNoPadding"]');
-                            if (collapseBtn) {
-                                collapseBtn.click();
-                            }
-                        }, 100);
+        // Access parent window (Streamlit app)
+        const parent = window.parent.document;
+        
+        // Check if mobile
+        if (window.parent.innerWidth <= 768) {
+            // Function to close sidebar
+            function closeSidebar() {
+                // Try multiple selectors for the collapse button
+                const selectors = [
+                    'button[data-testid="collapsedControl"]',
+                    'button[aria-label="Close sidebar"]',
+                    'section[data-testid="stSidebar"] button[kind="header"]',
+                    'button[data-testid="baseButton-headerNoPadding"]',
+                    '.stSidebar button'
+                ];
+                
+                for (const sel of selectors) {
+                    const btn = parent.querySelector(sel);
+                    if (btn) {
+                        btn.click();
+                        return true;
                     }
-                });
+                }
+                
+                // Fallback: directly manipulate sidebar attribute
+                const sidebar = parent.querySelector('section[data-testid="stSidebar"]');
+                if (sidebar) {
+                    sidebar.setAttribute('aria-expanded', 'false');
+                }
+                return false;
             }
-        })();
+            
+            // Listen for clicks on navigation items
+            parent.addEventListener('click', function(e) {
+                const target = e.target;
+                
+                // Check if clicked on radio button, button in sidebar, or link
+                const isRadio = target.closest('label[data-baseweb="radio"]');
+                const isSidebarButton = target.closest('section[data-testid="stSidebar"] button');
+                const isNavLink = target.closest('[data-testid="stSidebarNav"] a');
+                
+                if (isRadio || isSidebarButton || isNavLink) {
+                    // Delay to let Streamlit process, then close
+                    setTimeout(closeSidebar, 150);
+                }
+            }, true);
+        }
         </script>
-    """, unsafe_allow_html=True)
+    """, height=0)
     
     # --- SEARCH BOX ---
     st.sidebar.markdown("---")
