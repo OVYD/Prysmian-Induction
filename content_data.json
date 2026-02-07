@@ -234,24 +234,24 @@
     "analytics": {
         "page_views": {
             "outlook": {
-                "views": 3,
-                "last_viewed": "2026-02-06 23:25"
+                "views": 5,
+                "last_viewed": "2026-02-07 09:55"
             },
             "mfa": {
-                "views": 9,
-                "last_viewed": "2026-02-06 23:02"
+                "views": 11,
+                "last_viewed": "2026-02-07 09:55"
             },
             "vpn": {
-                "views": 2,
-                "last_viewed": "2026-02-06 17:24"
+                "views": 4,
+                "last_viewed": "2026-02-07 09:55"
             },
             "mobile": {
-                "views": 3,
-                "last_viewed": "2026-02-06 23:28"
+                "views": 5,
+                "last_viewed": "2026-02-07 09:55"
             },
             "software_center": {
-                "views": 1,
-                "last_viewed": "2026-02-06 17:31"
+                "views": 3,
+                "last_viewed": "2026-02-07 09:55"
             },
             "ticketing": {
                 "views": 1,
@@ -263,12 +263,19 @@
         },
         "daily_views": {
             "2026-02-06": {
-                "outlook": 3,
-                "mfa": 9,
-                "vpn": 2,
-                "mobile": 3,
-                "software_center": 1,
+                "outlook": 4,
+                "mfa": 10,
+                "vpn": 3,
+                "mobile": 4,
+                "software_center": 2,
                 "ticketing": 1
+            },
+            "2026-02-07": {
+                "mfa": 1,
+                "vpn": 1,
+                "software_center": 1,
+                "mobile": 1,
+                "outlook": 1
             }
         }
     },

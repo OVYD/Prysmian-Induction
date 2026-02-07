@@ -664,3 +664,204 @@ a {
         border-radius: 4px !important;
     }
 }
+
+/* ========================================
+   MOBILE RESPONSIVE STYLES
+   ======================================== */
+
+/* Tablets and smaller (max-width: 992px) */
+@media screen and (max-width: 992px) {
+
+    /* Sidebar adjustments */
+    section[data-testid="stSidebar"] {
+        min-width: 250px !important;
+        max-width: 280px !important;
+    }
+
+    /* Reduce padding on main content */
+    .main .block-container {
+        padding: 1rem 1.5rem !important;
+        max-width: 100% !important;
+    }
+
+    /* Smaller headings */
+    h1 {
+        font-size: 1.8rem !important;
+    }
+
+    h2 {
+        font-size: 1.4rem !important;
+    }
+
+    h3 {
+        font-size: 1.2rem !important;
+    }
+}
+
+/* Mobile phones (max-width: 768px) */
+@media screen and (max-width: 768px) {
+
+    /* Main content full width when sidebar collapsed */
+    .main .block-container {
+        padding: 0.75rem 1rem !important;
+        max-width: 100% !important;
+    }
+
+    /* Reduce font sizes */
+    body,
+    p,
+    span,
+    div {
+        font-size: 14px !important;
+    }
+
+    h1 {
+        font-size: 1.5rem !important;
+        line-height: 1.3 !important;
+    }
+
+    h2 {
+        font-size: 1.25rem !important;
+    }
+
+    h3 {
+        font-size: 1.1rem !important;
+    }
+
+    /* Step cards - stack vertically */
+    .step-card {
+        padding: 12px !important;
+        margin: 8px 0 !important;
+    }
+
+    .step-number {
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 14px !important;
+    }
+
+    /* Buttons - full width on mobile */
+    .stButton>button {
+        width: 100% !important;
+        padding: 10px 15px !important;
+        font-size: 14px !important;
+    }
+
+    /* Action cards - single column */
+    .action-card {
+        min-height: auto !important;
+        padding: 15px !important;
+    }
+
+    /* Images - fit screen */
+    img {
+        max-width: 100% !important;
+        height: auto !important;
+    }
+
+    /* Expanders - more compact */
+    .streamlit-expanderHeader {
+        font-size: 14px !important;
+        padding: 10px !important;
+    }
+
+    /* Tables - horizontal scroll */
+    .stDataFrame {
+        overflow-x: auto !important;
+    }
+
+    /* Column layouts - stack on mobile */
+    div[data-testid="column"] {
+        width: 100% !important;
+        flex: 1 1 100% !important;
+    }
+
+    /* Progress bar */
+    .stProgress>div {
+        height: 8px !important;
+    }
+
+    /* Sidebar footer */
+    .sidebar-footer {
+        font-size: 10px !important;
+        padding: 10px !important;
+    }
+
+    /* Quiz options - larger touch targets */
+    .stRadio>div {
+        gap: 8px !important;
+    }
+
+    .stRadio label {
+        padding: 12px !important;
+        font-size: 14px !important;
+    }
+
+    /* Certificate section */
+    .celebration-banner {
+        padding: 15px !important;
+    }
+
+    .celebration-banner h3 {
+        font-size: 1.2rem !important;
+    }
+}
+
+/* Small phones (max-width: 480px) */
+@media screen and (max-width: 480px) {
+    .main .block-container {
+        padding: 0.5rem 0.75rem !important;
+    }
+
+    h1 {
+        font-size: 1.3rem !important;
+    }
+
+    /* Very compact step cards */
+    .step-card {
+        padding: 10px !important;
+    }
+
+    /* Hide decorative elements */
+    .step-card::before {
+        display: none !important;
+    }
+
+    /* Compact buttons */
+    .stButton>button {
+        padding: 8px 12px !important;
+        font-size: 13px !important;
+    }
+
+    /* Sidebar when visible */
+    section[data-testid="stSidebar"] {
+        min-width: 100% !important;
+        max-width: 100% !important;
+    }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+
+    /* Larger touch targets */
+    .stButton>button {
+        min-height: 44px !important;
+    }
+
+    /* Remove hover effects that don't work on touch */
+    .stButton>button:hover {
+        transform: none !important;
+    }
+
+    .step-card:hover {
+        transform: none !important;
+    }
+
+    /* Checkbox/radio larger hit area */
+    .stCheckbox label,
+    .stRadio label {
+        min-height: 44px !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+}
