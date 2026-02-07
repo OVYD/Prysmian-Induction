@@ -184,6 +184,37 @@ def inject_custom_css():
 def render_sidebar():
     st.sidebar.markdown("### Induction Portal")
     
+    # --- MOBILE: Auto-close sidebar on navigation ---
+    # This JavaScript closes the sidebar when user clicks a radio button on mobile
+    st.sidebar.markdown("""
+        <script>
+        (function() {
+            // Only run on mobile
+            if (window.innerWidth <= 768) {
+                // Watch for clicks on radio buttons in sidebar
+                document.addEventListener('click', function(e) {
+                    const radioLabel = e.target.closest('label[data-baseweb="radio"]');
+                    const navButton = e.target.closest('button');
+                    
+                    if (radioLabel || (navButton && navButton.closest('section[data-testid="stSidebar"]'))) {
+                        // Delay to let Streamlit process the click
+                        setTimeout(function() {
+                            const sidebar = document.querySelector('section[data-testid="stSidebar"]');
+                            const closeBtn = document.querySelector('button[data-testid="stSidebar"] button, button[aria-label="Close sidebar"]');
+                            
+                            // Try to find and click the collapse button
+                            const collapseBtn = document.querySelector('button[data-testid="baseButton-headerNoPadding"]');
+                            if (collapseBtn) {
+                                collapseBtn.click();
+                            }
+                        }, 100);
+                    }
+                });
+            }
+        })();
+        </script>
+    """, unsafe_allow_html=True)
+    
     # --- SEARCH BOX ---
     st.sidebar.markdown("---")
     
