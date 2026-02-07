@@ -192,49 +192,49 @@ def render_sidebar():
     components.html("""
         <script>
         // Access parent window (Streamlit app)
-        const parent = window.parent.document;
+        const parent = window.parent;
+        const doc = parent.document;
         
-        // Check if mobile
-        if (window.parent.innerWidth <= 768) {
+        // PREVENT MULTIPLE REGISTRATIONS - check if already initialized
+        if (!parent._sidebarAutoCloseInitialized && parent.innerWidth <= 768) {
+            parent._sidebarAutoCloseInitialized = true;
+            
+            // Debounce flag to prevent multiple triggers
+            let isClosing = false;
+            
             // Function to close sidebar
             function closeSidebar() {
+                if (isClosing) return;
+                isClosing = true;
+                
                 // Try multiple selectors for the collapse button
                 const selectors = [
                     'button[data-testid="collapsedControl"]',
                     'button[aria-label="Close sidebar"]',
                     'section[data-testid="stSidebar"] button[kind="header"]',
-                    'button[data-testid="baseButton-headerNoPadding"]',
-                    '.stSidebar button'
+                    'button[data-testid="baseButton-headerNoPadding"]'
                 ];
                 
                 for (const sel of selectors) {
-                    const btn = parent.querySelector(sel);
+                    const btn = doc.querySelector(sel);
                     if (btn) {
                         btn.click();
-                        return true;
+                        break;
                     }
                 }
                 
-                // Fallback: directly manipulate sidebar attribute
-                const sidebar = parent.querySelector('section[data-testid="stSidebar"]');
-                if (sidebar) {
-                    sidebar.setAttribute('aria-expanded', 'false');
-                }
-                return false;
+                // Reset flag after a delay
+                setTimeout(() => { isClosing = false; }, 500);
             }
             
-            // Listen for clicks on navigation items
-            parent.addEventListener('click', function(e) {
-                const target = e.target;
+            // Listen for clicks on navigation radio buttons only
+            doc.addEventListener('click', function(e) {
+                // Only trigger for radio button clicks (navigation menu)
+                const isRadio = e.target.closest('label[data-baseweb="radio"]');
                 
-                // Check if clicked on radio button, button in sidebar, or link
-                const isRadio = target.closest('label[data-baseweb="radio"]');
-                const isSidebarButton = target.closest('section[data-testid="stSidebar"] button');
-                const isNavLink = target.closest('[data-testid="stSidebarNav"] a');
-                
-                if (isRadio || isSidebarButton || isNavLink) {
+                if (isRadio) {
                     // Delay to let Streamlit process, then close
-                    setTimeout(closeSidebar, 150);
+                    setTimeout(closeSidebar, 200);
                 }
             }, true);
         }
