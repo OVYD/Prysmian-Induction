@@ -184,31 +184,6 @@ def inject_custom_css():
 def render_sidebar():
     st.sidebar.markdown("### Induction Portal")
     
-    # --- MOBILE: Auto-collapse sidebar after navigation ---
-    # Track if we just navigated (set by callback in navigation section)
-    just_navigated = st.session_state.get("_just_navigated", False)
-    
-    if just_navigated:
-        # Reset the flag
-        st.session_state._just_navigated = False
-        
-        # Inject JavaScript to close sidebar on mobile using img onerror technique
-        # This works because onerror executes even when script tags don't
-        st.sidebar.markdown("""
-            <img src="data:," onerror="
-                (function() {
-                    if (window.innerWidth <= 768) {
-                        var btns = document.querySelectorAll('button[data-testid=\\'collapsedControl\\']');
-                        if (btns.length > 0) { btns[0].click(); }
-                        else {
-                            var sidebar = document.querySelector('section[data-testid=\\'stSidebar\\']');
-                            if (sidebar) { sidebar.setAttribute('aria-expanded', 'false'); }
-                        }
-                    }
-                })();
-            " style="display:none;">
-        """, unsafe_allow_html=True)
-    
     # --- SEARCH BOX ---
     st.sidebar.markdown("---")
     
@@ -293,9 +268,6 @@ def render_sidebar():
         # Clear search when navigating
         st.session_state.clear_search = True
         st.session_state.current_search = ""  # Also clear current value
-        
-        # Flag for mobile sidebar auto-close
-        st.session_state._just_navigated = True
         
         # Update URL
         st.query_params["page"] = new_key
