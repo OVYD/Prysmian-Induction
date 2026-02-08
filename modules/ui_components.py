@@ -184,62 +184,30 @@ def inject_custom_css():
 def render_sidebar():
     st.sidebar.markdown("### Induction Portal")
     
-    # --- MOBILE: Auto-close sidebar on navigation ---
-    # Inject JavaScript that actually runs using components.html
-    import streamlit.components.v1 as components
+    # --- MOBILE: Auto-collapse sidebar after navigation ---
+    # Track if we just navigated (set by callback in navigation section)
+    just_navigated = st.session_state.get("_just_navigated", False)
     
-    # This creates an invisible iframe that runs our script
-    components.html("""
-        <script>
-        // Access parent window (Streamlit app)
-        const parent = window.parent;
-        const doc = parent.document;
+    if just_navigated:
+        # Reset the flag
+        st.session_state._just_navigated = False
         
-        // PREVENT MULTIPLE REGISTRATIONS - check if already initialized
-        if (!parent._sidebarAutoCloseInitialized && parent.innerWidth <= 768) {
-            parent._sidebarAutoCloseInitialized = true;
-            
-            // Debounce flag to prevent multiple triggers
-            let isClosing = false;
-            
-            // Function to close sidebar
-            function closeSidebar() {
-                if (isClosing) return;
-                isClosing = true;
-                
-                // Try multiple selectors for the collapse button
-                const selectors = [
-                    'button[data-testid="collapsedControl"]',
-                    'button[aria-label="Close sidebar"]',
-                    'section[data-testid="stSidebar"] button[kind="header"]',
-                    'button[data-testid="baseButton-headerNoPadding"]'
-                ];
-                
-                for (const sel of selectors) {
-                    const btn = doc.querySelector(sel);
-                    if (btn) {
-                        btn.click();
-                        break;
+        # Inject JavaScript to close sidebar on mobile using img onerror technique
+        # This works because onerror executes even when script tags don't
+        st.sidebar.markdown("""
+            <img src="data:," onerror="
+                (function() {
+                    if (window.innerWidth <= 768) {
+                        var btns = document.querySelectorAll('button[data-testid=\\'collapsedControl\\']');
+                        if (btns.length > 0) { btns[0].click(); }
+                        else {
+                            var sidebar = document.querySelector('section[data-testid=\\'stSidebar\\']');
+                            if (sidebar) { sidebar.setAttribute('aria-expanded', 'false'); }
+                        }
                     }
-                }
-                
-                // Reset flag after a delay
-                setTimeout(() => { isClosing = false; }, 500);
-            }
-            
-            // Listen for clicks on navigation radio buttons only
-            doc.addEventListener('click', function(e) {
-                // Only trigger for radio button clicks (navigation menu)
-                const isRadio = e.target.closest('label[data-baseweb="radio"]');
-                
-                if (isRadio) {
-                    // Delay to let Streamlit process, then close
-                    setTimeout(closeSidebar, 200);
-                }
-            }, true);
-        }
-        </script>
-    """, height=0)
+                })();
+            " style="display:none;">
+        """, unsafe_allow_html=True)
     
     # --- SEARCH BOX ---
     st.sidebar.markdown("---")
@@ -325,6 +293,9 @@ def render_sidebar():
         # Clear search when navigating
         st.session_state.clear_search = True
         st.session_state.current_search = ""  # Also clear current value
+        
+        # Flag for mobile sidebar auto-close
+        st.session_state._just_navigated = True
         
         # Update URL
         st.query_params["page"] = new_key

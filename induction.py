@@ -13,7 +13,7 @@ st.set_page_config(
     page_title="Induction Portal", 
     page_icon="images/prysmian_icon.png", 
     layout="wide", 
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded"  # Expanded for desktop, CSS handles mobile
 )
 
 # --- 2. GLOBAL STYLES ---
